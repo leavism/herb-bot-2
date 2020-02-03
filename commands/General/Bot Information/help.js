@@ -6,7 +6,7 @@ module.exports = class extends Command {
 
 	constructor(...args) {
 		super(...args, {
-			aliases: ['commands'],
+			aliases: ['halp'],
 			guarded: true,
 			description: language => language.get('COMMAND_HELP_DESCRIPTION'),
 			usage: '(Command:command)'
@@ -29,7 +29,7 @@ module.exports = class extends Command {
 			].join('\n');
 			return message.sendMessage(info, { code: 'asciidoc' });
 		}
-		return message.author.send(await this.buildHelpEmbed(message))
+		return message.send(await this.buildHelpEmbed(message))
 	}
 
 	// async run(message, [command]) {
@@ -84,7 +84,7 @@ module.exports = class extends Command {
 	async buildHelp(message) {
 		const help = {};
 
-		// const { prefix } = message.guildSettings;
+		const { prefix } = message.guildSettings;
 		// These two lines are for padding the message to be evenly spaced
 		const commandNames = [...this.client.commands.keys()];
 		const longest = commandNames.reduce((long, str) => Math.max(long, str.length), 0);
