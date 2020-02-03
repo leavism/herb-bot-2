@@ -8,7 +8,7 @@ module.exports = class extends Command {
 		super(...args, {
 			permissionLevel: 10,
 			guarded: true,
-			description: language => language.get('COMMAND_TRANSFER_DESCRIPTION'),
+			description: 'Transfers a core piece to its respective folder.',
 			usage: '<Piece:piece>'
 		});
 	}

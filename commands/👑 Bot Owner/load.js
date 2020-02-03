@@ -9,7 +9,7 @@ module.exports = class extends Command {
 			aliases: ['l'],
 			permissionLevel: 10,
 			guarded: true,
-			description: language => language.get('COMMAND_LOAD_DESCRIPTION'),
+			description: 'Load a piece from your bot.',
 			usage: '[core] <Store:store> <path:...string>',
 			usageDelim: ' '
 		});
