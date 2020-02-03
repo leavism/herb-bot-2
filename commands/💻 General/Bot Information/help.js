@@ -21,7 +21,7 @@ module.exports = class extends Command {
 
 	async run(message, [command]) {
 		if (command) {
-			return message.send(await this.buildCommandEmbed(message,command))
+			return message.send(await this.buildCommandEmbed(message, command))
 		}
 		return message.send(await this.buildHelpEmbed(message))
 	}
@@ -50,10 +50,10 @@ module.exports = class extends Command {
 		return commandEmbed
 	}
 
-	async buildHelpEmbed(message) { 
+	async buildHelpEmbed(message) {
 		const { prefix } = message.guildSettings;
 		const all = {};
-		await Promise.all(this.client.commands.map((command) => 
+		await Promise.all(this.client.commands.map((command) =>
 			this.client.inhibitors.run(message, command, true)
 				.then(() => {
 					if (!has(all, command.category)) all[command.category] = [];
