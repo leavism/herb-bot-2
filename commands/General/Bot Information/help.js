@@ -8,8 +8,9 @@ module.exports = class extends Command {
 		super(...args, {
 			aliases: ['halp'],
 			guarded: true,
-			description: language => language.get('COMMAND_HELP_DESCRIPTION'),
-			usage: '(Command:command)'
+			description: "Lists all the categories or displays detailed info about a command.",
+			usage: '[Command:command]',
+			extendedHelp: 'You can specify a command to get detailed information about that command. Using the command by itself will list all the different command categories.'
 		});
 
 		this.createCustomResolver('command', (arg, possible, message) => {
@@ -20,14 +21,15 @@ module.exports = class extends Command {
 
 	async run(message, [command]) {
 		if (command) {
-			const info = [
-				`= ${command.name} = `,
-				isFunction(command.description) ? command.description(message.language) : command.description,
-				message.language.get('COMMAND_HELP_USAGE', command.usage.fullUsage(message)),
-				message.language.get('COMMAND_HELP_EXTENDED'),
-				isFunction(command.extendedHelp) ? command.extendedHelp(message.language) : command.extendedHelp
-			].join('\n');
-			return message.sendMessage(info, { code: 'asciidoc' });
+			// const info = [
+			// 	`= ${command.name} = `,
+			// 	isFunction(command.description) ? command.description(message.language) : command.description,
+			// 	message.language.get('COMMAND_HELP_USAGE', command.usage.fullUsage(message)),
+			// 	message.language.get('COMMAND_HELP_EXTENDED'),
+			// 	isFunction(command.extendedHelp) ? command.extendedHelp(message.language) : command.extendedHelp
+			// ].join('\n');
+			// return message.sendMessage(info, { code: 'asciidoc' });
+			return message.send(await this.buildHelpCommandEmbed(message,command))
 		}
 		return message.send(await this.buildHelpEmbed(message))
 	}
@@ -57,6 +59,30 @@ module.exports = class extends Command {
 	// 		.then(() => { if (message.channel.type !== 'dm') message.sendLocale('COMMAND_HELP_DM'); })
 	// 		.catch(() => { if (message.channel.type !== 'dm') message.sendLocale('COMMAND_HELP_NODM'); });
 	// }
+
+	async buildHelpCommandEmbed(message, command) {
+		let help = new MessageEmbed()
+			.setTitle(`Command \`\`\`${command.name}\`\`\``)
+			.setDescription(command.description)
+			.addField(
+				'Aliase(s)',
+				(command.aliases.length > 0) ? command.aliases : "None.",
+				false
+			)
+			.addField(
+				'Format',
+				(command.usage.fullUsage(message).length > 0) ? `\`\`\`${command.usage.fullUsage(message)}\`\`\`` : "No examples.",
+				false
+			)
+			.addField(
+				'Note',
+				(command.extendedHelp.length > 0) ? command.extendedHelp : "No notes."
+			)
+			.setFooter(
+				'《 》 aliases │ < > required field │ [ ] optional field '
+			)
+		return help
+	}
 
 	async buildHelpEmbed(message) { 
 		const { prefix } = message.guildSettings;
