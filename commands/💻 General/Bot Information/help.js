@@ -65,17 +65,17 @@ module.exports = class extends Command {
 			.setTitle(`Command \`\`\`${command.name}\`\`\``)
 			.setDescription(command.description)
 			.addField(
-				'Aliase(s)',
+				'🛠 Aliase(s)',
 				(command.aliases.length > 0) ? command.aliases : "None.",
 				false
 			)
 			.addField(
-				'Format',
+				'📝 Format',
 				(command.usage.fullUsage(message).length > 0) ? `\`\`\`${command.usage.fullUsage(message)}\`\`\`` : "No examples.",
 				false
 			)
 			.addField(
-				'Note',
+				'💡 Notes',
 				(command.extendedHelp.length > 0) ? command.extendedHelp : "No notes."
 			)
 			.setFooter(
