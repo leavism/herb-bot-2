@@ -1,5 +1,6 @@
 const { Client } = require('klasa');
 const config = require('./config.js');
+
 (() => {
   const client = new Client({
     prefix: '-',
