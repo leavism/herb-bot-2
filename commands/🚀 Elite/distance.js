@@ -8,7 +8,7 @@ module.exports = class extends Command {
       aliases: ['dist'],
       runIn: ['dm', 'text'],
       description: 'Find the distance between two systems.',
-      usage: '<SystemA:system> <SystemB:system>',
+      usage: '<SystemA:string> <SystemB:string>',
       usageDelim: ', '
     });
 
