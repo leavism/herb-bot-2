@@ -6,7 +6,7 @@ module.exports = class extends Command {
 		super(...args, {
 			permissionLevel: 10,
 			guarded: true,
-			description: language => language.get('COMMAND_DISABLE_DESCRIPTION'),
+			description: 'Re-disables/temp. disables a piece. Default state restored on reboot.',
 			usage: '<Piece:piece>'
 		});
 	}
