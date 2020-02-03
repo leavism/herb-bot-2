@@ -56,7 +56,7 @@ module.exports = class extends Command {
 					if (!has(help, command.category)) help[command.category] = {};
 					if (!has(help[command.category], command.subCategory)) help[command.category][command.subCategory] = [];
 					const description = isFunction(command.description) ? command.description(message.language) : command.description;
-					help[command.category][command.subCategory].push(`${prefix}${command.name.padEnd(longest)} :: ${description}`);
+					help[command.category][command.subCategory].push(`• ${command.name.padEnd(longest)} :: ${description}`);
 				})
 				.catch(() => {
 					// noop
