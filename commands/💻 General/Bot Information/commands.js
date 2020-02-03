@@ -14,7 +14,7 @@ function cleanUpName(string){
 module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
-      aliases: ['command, comands, comands'],
+      aliases: ['command', 'comands', 'comands'],
       guarded: true,
       description: 'Lists all the commands in a category.',
       usage: '<Category:category>',
