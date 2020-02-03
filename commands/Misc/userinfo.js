@@ -12,14 +12,15 @@ module.exports = class extends Command {
   }
 
   async run(message, [...params]) {
-    let user = ((message.mentions.users.size == 0) ? message.author :  message.mentions.users.first());
+    // If no user mention, then info pulled about author
+    let user = ((message.mentions.users.size == 0) ? message.author : message.mentions.users.first());
     let tag = user.tag;
     let createdAt = user.createdAt;
     let createdDaysAgo = `(${Math.round((new Date() - createdAt) / (24*60*60*1000))} days ago)`
     let joinedAt = message.member.joinedAt;
     let joinedDaysAgo = `(${Math.round((new Date() - joinedAt) / (24*60*60*1000))} days ago)`
-    let roles = message.member.roles.map(m => m.name).filter(m => m != '@everyone').join(', ');
-    if (roles.length == 0) roles = 'No roles :(';
+    let roles = (message.member.roles.length == 0) ? 'No roles :(' : message.member.roles.map(m => m.name).filter(m => m != '@everyone').join(', ');
+    let sortedMembers = message.guild.members.sort(compareJoinedAt).map(m => m.user)
 
     return message.send({embed : {
       title: tag,
@@ -41,8 +42,15 @@ module.exports = class extends Command {
             inline: true,
             value: roles
           }
-        ]
+        ],
+        footer: { text: `Member #${sortedMembers.indexOf(user) + 1} | User ID: ${user.id}`}
       }
     })
   }
+}
+
+function compareJoinedAt(a, b) {
+  if (a.joinedAt > b.joinedAt) return 1;
+  else if (a.joinedAt < b.joinedAt) return -1;
+  return 0
 }
