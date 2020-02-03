@@ -7,8 +7,8 @@ module.exports = class extends Command {
       enabled: 'true',
       runIn: ['text'],
       cooldown: 3,
-      description: 'Basic user information!',
-      usage: '(mention:user)',
+      description: 'Get basic user information!',
+      usage: '[mention:user]',
       extendedHelp: 'You can mention another user for their user information. If you don\'t, it\'ll pull out author information.'
     }); 
   }
