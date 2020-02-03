@@ -22,8 +22,7 @@ module.exports = class extends Command {
     });
 
     this.createCustomResolver('category', (arg, possible, message) => {
-      if (!arg || arg === '') return undefined;
-      return this.client.arguments.get('category').run(arg, possible, message);
+			return this.client.arguments.get('category').run(arg, possible, message)
     });
   }
 
@@ -35,7 +34,7 @@ module.exports = class extends Command {
 			helpMessage.push(`**${categories[cat]} Commands**:`, '```asciidoc');
 			const subCategories = Object.keys(help[categories[cat]]);
 			for (let subCat = 0; subCat < subCategories.length; subCat++) helpMessage.push(`= ${subCategories[subCat]} =`, `${help[categories[cat]][subCategories[subCat]].join('\n')}\n`);
-			helpMessage.push('```', '\u200b');
+			helpMessage.push('Use ?help <command> for detailed information on a command.```', '\u200b');
     }
     return message.send(helpMessage, { split: { char: '\u200b' } })
   }
