@@ -18,7 +18,7 @@ module.exports = class extends Command {
       guarded: true,
       description: 'Lists all the commands in a category.',
       usage: '<Category:category>',
-      extendedHelp: ''
+      extendedHelp: 'This only works with command categories. Try \`?help\` to see all the categories.'
     });
 
     this.createCustomResolver('category', (arg, possible, message) => {
@@ -41,8 +41,6 @@ module.exports = class extends Command {
 
   async buildHelp(message, category) {
 		const help = {};
-
-		const { prefix } = message.guildSettings;
 		// These two lines are for padding the message to be evenly spaced
 		const commandNames = [...this.client.commands.keys()];
 		const longest = commandNames.reduce((long, str) => Math.max(long, str.length), 0);
