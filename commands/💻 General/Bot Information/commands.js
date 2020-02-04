@@ -14,11 +14,11 @@ function cleanUpName(string){
 module.exports = class extends Command {
   constructor(...args) {
     super(...args, {
-      aliases: ['command', 'comands', 'comands'],
+      aliases: ['command', 'comands', 'comand'],
       guarded: true,
       description: 'Lists all the commands in a category.',
       usage: '<Category:category>',
-      extendedHelp: 'This only works with command categories. Try \`?help\` to see all the categories.'
+      extendedHelp: `This only works with command categories. Use the \`help\` command to see all categories.`
     });
 
     this.createCustomResolver('category', (arg, possible, message) => {
@@ -34,7 +34,7 @@ module.exports = class extends Command {
 			helpMessage.push(`**${categories[cat]} Commands**:`, '```asciidoc');
 			const subCategories = Object.keys(help[categories[cat]]);
 			for (let subCat = 0; subCat < subCategories.length; subCat++) helpMessage.push(`= ${subCategories[subCat]} =`, `${help[categories[cat]][subCategories[subCat]].join('\n')}\n`);
-			helpMessage.push('Use ?help <command> for detailed information on a command.```', '\u200b');
+			helpMessage.push(`Use ${this.client.options.prefix}help <command> for detailed information on a command. \`\`\``);
     }
     return message.send(helpMessage, { split: { char: '\u200b' } })
   }
