@@ -56,7 +56,7 @@ module.exports = class extends Command {
 					help[command.category][command.subCategory].push(`• ${command.name.padEnd(longest)} :: ${description}`);
 				})
 				.catch(() => {
-					// noop
+					// To pass over commands to not include
 				})
 		));
 

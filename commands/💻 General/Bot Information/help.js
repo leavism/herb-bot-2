@@ -8,6 +8,7 @@ module.exports = class extends Command {
 		super(...args, {
 			aliases: ['halp'],
 			guarded: true,
+			permissionLevel: 0,
 			description: "Lists all the categories or displays detailed info about a command.",
 			usage: '[Command:command]',
 			extendedHelp: 'You can specify a command to get detailed information about that command. Using the command by itself will list all the different command categories.'
@@ -24,6 +25,7 @@ module.exports = class extends Command {
 			return message.send(await this.buildCommandEmbed(message, command))
 		}
 		return message.send(await this.buildHelpEmbed(message))
+
 	}
 
 	async buildCommandEmbed(message, command) {
@@ -58,6 +60,9 @@ module.exports = class extends Command {
 				.then(() => {
 					if (!has(all, command.category)) all[command.category] = [];
 					all[command.category].push(command)
+				})
+				.catch(() => {
+					// To pass over commands that aren't included.
 				})
 		))
 		const helpEmbed = new MessageEmbed()

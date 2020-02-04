@@ -19,6 +19,9 @@ module.exports = class extends Argument {
         .then(() => {
           if (!categories.includes(cleanUpName(command.category))) categories.push(cleanUpName(command.category));
         })
+        .catch(() => {
+          // To pass over commands not included.
+        })
       ));
       arg = removeEmojis(arg).trim().toLowerCase()
       if (categories.indexOf(arg) >= 0) {
