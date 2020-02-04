@@ -27,5 +27,4 @@ module.exports = class extends Argument {
         throw "That was an invalid category. Try `?help` to see all the categories."
       }
     }
-
 };
