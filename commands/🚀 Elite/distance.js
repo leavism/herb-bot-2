@@ -41,7 +41,6 @@ module.exports = class extends Command {
     system = system.replace('+', '%2B').replace(' ', '+');
     let url = `https://www.edsm.net/api-v1/system?sysname=${system}&coords=1`;
     const response = await fetch(url)
-    let coords = response.json();
-    return coords
+    return response.json();
   }
 }
