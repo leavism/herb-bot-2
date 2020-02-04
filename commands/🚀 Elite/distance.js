@@ -9,7 +9,8 @@ module.exports = class extends Command {
       runIn: ['dm', 'text'],
       description: 'Find the distance between two systems.',
       usage: '<SystemA:string> <SystemB:string>',
-      usageDelim: ', '
+      usageDelim: ',',
+      usageHelp: 'Don\'t forget the comma between the two system names.'
     });
 
     this.createCustomResolver('system', (arg, possible, message) => {
@@ -18,8 +19,8 @@ module.exports = class extends Command {
   }
 
   async run(message, [systemA, systemB]) {
-    let systemACoords = await this.getCoords(systemA);
-    let systemBCoords = await this.getCoords(systemB);
+    let systemACoords = await this.getCoords(systemA.trim());
+    let systemBCoords = await this.getCoords(systemB.trim());
 
     // EDSM does not have HTTP statuses, so they all return code 200
     if (Array.isArray(systemACoords)) {
