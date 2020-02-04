@@ -29,8 +29,9 @@ module.exports = class extends Command {
 	}
 
 	async buildCommandEmbed(message, command) {
+		const { prefix } = message.guildSettings;
 		let commandEmbed = new MessageEmbed()
-			.setTitle(`Command \`\`\`${command.name}\`\`\``)
+			.setTitle(`Command \`\`\`${prefix}${command.name}\`\`\``)
 			.setDescription(command.description)
 			.addField(
 				'🛠 Aliase(s)',
