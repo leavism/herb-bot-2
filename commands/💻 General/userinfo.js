@@ -1,7 +1,7 @@
-const { Command } = require('klasa');
+const { Command , Timestamp} = require('klasa');
 
 module.exports = class extends Command {
-  constructor(...args){
+  constructor(...args) {
     super(...args, {
       name: 'userinfo',
       enabled: 'true',
@@ -10,7 +10,8 @@ module.exports = class extends Command {
       description: 'Get basic user information!',
       usage: '[mention:user]',
       extendedHelp: 'You can mention another user for their user information. If you don\'t, it\'ll pull out author information.'
-    }); 
+    });
+    this.timestamp = new Timestamp('d MMMM YYYY')
   }
 
   async run(message, [...params]) {
@@ -32,12 +33,12 @@ module.exports = class extends Command {
           {
             name: 'Joined Discord on',
             inline: true,
-            value: `${createdAt.getDate()} ${createdAt.getMonthText()}${createdAt.getFullYear()}\n${createdDaysAgo}`
+            value: `${this.timestamp.display(createdAt)}\n${createdDaysAgo}`
           },
           {
             name: 'Joined Simbad on',
             inline: true,
-            value: `${joinedAt.getDate()} ${joinedAt.getMonthText()}${joinedAt.getFullYear()}\n${joinedDaysAgo}`
+            value: `${this.timestamp.display(joinedAt)}\n${joinedDaysAgo}`
           },
           {
             name: 'Roles',
