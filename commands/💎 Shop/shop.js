@@ -83,7 +83,7 @@ module.exports = class extends Command {
 
   buyItem(userObj, itemObj) {
     if (userObj.balance < itemObj.cost) { return 'You don\'t have enough Simbits!' }
-    else if (itemObj.stock == 0) { return `The shop is out of stock of ${itemObj.item}` }
+    else if (itemObj.stock == 0) { return `The shop is out of stock of ${itemObj.item}.` }
     else {
       this.addToInventory(userObj, itemObj);
       this.saveShop()
