@@ -1,0 +1,25 @@
+{
+  "name": "dal-bot",
+  "version": "1.0.0",
+  "description": "Simbad's Herb Bot 2.0",
+  "main": "app.js",
+  "dependencies": {
+    "discord.js": "^12.0.0-dev",
+    "klasa": "^0.5.0-dev",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leavism/Herb-Bot-2.0.git"
+  },
+  "author": "Leavism",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leavism/Herb-Bot-2.0/issues"
+  },
+  "homepage": "https://github.com/leavism/Herb-Bot-2.0#readme"
+}
