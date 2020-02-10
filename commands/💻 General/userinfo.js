@@ -21,19 +21,19 @@ module.exports = class extends Command {
 
   async buildUserInfoEmbed (message) {
     // If no user mention, then info pulled about author
-    const user = ((message.mentions.users.size === 0) ? message.author : message.mentions.users.first())
-    const createdDaysAgo = `(${Math.round((new Date() - user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const joinedDaysAgo = `(${Math.round((new Date() - message.member.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const roles = (message.member.roles.length === 0) ? 'No roles :(' : message.member.roles.map(m => m.name).filter(m => m !== '@everyone').join(', ')
+    const target = ((message.mentions.users.size === 0) ? message.member : message.mentions.members.first())
+    const createdDaysAgo = `(${Math.round((new Date() - target.user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
+    const joinedDaysAgo = `(${Math.round((new Date() - target.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
+    const roles = (target.roles.size === 1) ? 'No roles :(' : target.roles.map(m => m.name).filter(m => m !== '@everyone').join(', ')
     const sortedMembers = message.guild.members.sort(this.compareJoinedAt).map(m => m.user)
 
     const userInfoEmbed = new MessageEmbed()
-      .setTitle(user.tag)
-      .setThumbnail(user.avatarURL())
+      .setTitle(target.user.tag)
+      .setThumbnail(target.user.displayAvatarURL())
       .setColor(message.member.displayHexColor)
       .addField(
         'Joined Discord on',
-        `${this.timestamp.display(user.createdAt)}\n${createdDaysAgo}`,
+        `${this.timestamp.display(target.createdAt)}\n${createdDaysAgo}`,
         true
       )
       .addField(
@@ -46,7 +46,7 @@ module.exports = class extends Command {
         roles,
         true
       )
-      .setFooter(`Member #${sortedMembers.indexOf(user) + 1} | User ID: ${user.id}`)
+      .setFooter(`Member #${sortedMembers.indexOf(target) + 1} | User ID: ${target.id}`)
     return userInfoEmbed
   }
 
