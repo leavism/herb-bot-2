@@ -1,4 +1,5 @@
 const { Command, Timestamp } = require('klasa')
+const { MessageEmbed } = require('discord.js')
 
 module.exports = class extends Command {
   constructor (...args) {
@@ -15,46 +16,43 @@ module.exports = class extends Command {
   }
 
   async run (message, [...params]) {
-    // If no user mention, then info pulled about author
-    const user = ((message.mentions.users.size == 0) ? message.author : message.mentions.users.first())
-    const tag = user.tag
-    const createdAt = user.createdAt
-    const createdDaysAgo = `(${Math.round((new Date() - createdAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const joinedAt = message.member.joinedAt
-    const joinedDaysAgo = `(${Math.round((new Date() - joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const roles = (message.member.roles.length == 0) ? 'No roles :(' : message.member.roles.map(m => m.name).filter(m => m != '@everyone').join(', ')
-    const sortedMembers = message.guild.members.sort(compareJoinedAt).map(m => m.user)
-
-    return message.send({
-      embed: {
-        title: tag,
-        thumbnail: { url: user.avatarURL() },
-        color: message.member.displayHexColor,
-        fields: [
-          {
-            name: 'Joined Discord on',
-            inline: true,
-            value: `${this.timestamp.display(createdAt)}\n${createdDaysAgo}`
-          },
-          {
-            name: 'Joined Simbad on',
-            inline: true,
-            value: `${this.timestamp.display(joinedAt)}\n${joinedDaysAgo}`
-          },
-          {
-            name: 'Roles',
-            inline: true,
-            value: roles
-          }
-        ],
-        footer: { text: `Member #${sortedMembers.indexOf(user) + 1} | User ID: ${user.id}` }
-      }
-    })
+    return message.send(await this.buildUserInfoEmbed(message))
   }
-}
 
-function compareJoinedAt (a, b) {
-  if (a.joinedAt > b.joinedAt) return 1
-  else if (a.joinedAt < b.joinedAt) return -1
-  return 0
+  async buildUserInfoEmbed (message) {
+    // If no user mention, then info pulled about author
+    const user = ((message.mentions.users.size === 0) ? message.author : message.mentions.users.first())
+    const createdDaysAgo = `(${Math.round((new Date() - user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
+    const joinedDaysAgo = `(${Math.round((new Date() - message.member.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
+    const roles = (message.member.roles.length === 0) ? 'No roles :(' : message.member.roles.map(m => m.name).filter(m => m !== '@everyone').join(', ')
+    const sortedMembers = message.guild.members.sort(this.compareJoinedAt).map(m => m.user)
+
+    const userInfoEmbed = new MessageEmbed()
+      .setTitle(user.tag)
+      .setThumbnail(user.avatarURL())
+      .setColor(message.member.displayHexColor)
+      .addField(
+        'Joined Discord on',
+        `${this.timestamp.display(user.createdAt)}\n${createdDaysAgo}`,
+        true
+      )
+      .addField(
+        'Joined Simbad on',
+        `${this.timestamp.display(message.member.joinedAt)}\n${joinedDaysAgo}`,
+        true
+      )
+      .addField(
+        'Roles',
+        roles,
+        true
+      )
+      .setFooter(`Member #${sortedMembers.indexOf(user) + 1} | User ID: ${user.id}`)
+    return userInfoEmbed
+  }
+
+  compareJoinedAt (a, b) {
+    if (a.joinedAt > b.joinedAt) return 1
+    else if (a.joinedAt < b.joinedAt) return -1
+    return 0
+  }
 }
