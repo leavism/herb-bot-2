@@ -1,7 +1,6 @@
+/* eslint-disable no-throw-literal */
 const { Command } = require('klasa')
 const { MessageEmbed } = require('discord.js')
-const shop = require('../../data/data.json')
-const fs = require('fs')
 
 module.exports = class extends Command {
   constructor (...args) {
@@ -11,39 +10,41 @@ module.exports = class extends Command {
       usage: '<bank|list|buy|help:default> [item:...string]',
       usageDelim: ' '
     })
+    this.db = this.client.providers.get('mysql')
   }
 
   async bank (message, params) {
     if (this.checkUser(message.author) === false) this.makeUser(message.author)
-    const shopUser = this.getUser(message.author)
+    const shopUser = await this.getUser(message.author)
     const userEmbed = new MessageEmbed()
       .setTitle(`${message.author.username}'s Shop Profile`)
       .setThumbnail(message.author.avatarURL())
       .setDescription('This is your Simbit Shop profile! Look at what you own and your Simbit balance.')
       .addField(
-        'Balanace',
+        'Balance',
         shopUser.balance,
         true
       )
       .addField(
         'Inventory',
-        this.stringifyInventory(shopUser),
+        await this.stringifyInventory(shopUser),
         true
       )
     return message.send(userEmbed)
   }
 
   async list (message, params) {
-    if (this.checkUser(message.author) === false) this.makeUser(message.author)
-    return message.send(this.buildShopEmbed())
+    if (await this.checkUser(message.author) === false) await this.makeUser(message.author)
+    return message.send(await this.buildShopEmbed())
   }
 
-  async buy (message, [item]) {
+  async buy (message, [itemName]) {
     if (this.checkUser(message.author) === false) this.makeUser(message.author)
-    const targetItem = this.getItem(item)
-    const user = this.getUser(message.author)
+    if (itemName == null) {
+      throw 'Please specify what item you\'re trying to buy.'
+    }
 
-    return message.send(this.buyItem(user, targetItem))
+    return message.send(await this.buyItem(message.author, itemName.toLowerCase()))
   }
 
   async help (message, params) {
@@ -52,77 +53,63 @@ module.exports = class extends Command {
   }
 
   async makeUser (memberObj) {
-    shop.users.push(
-      {
-        id: memberObj.id.toString(),
-        name: memberObj.username,
-        balance: 0,
-        inventory: []
-      }
-    )
-    return this.saveShop()
+    const id = await this.db.countRows('user')
+    const startingBalance = 0
+    await this.db.run(`INSERT INTO user (id, discord_id, balance) VALUES (${id + 1}, ${memberObj.id}, ${startingBalance})`)
   }
 
-  getUser (memberObj) {
-    try {
-      return shop.users.find(user => user.id === memberObj.id)
-    } catch (TypeError) {
-      return null
-    }
+  async getUser (memberObj) {
+    return this.db.get('user', 'discord_id', memberObj.id)
   }
 
-  checkUser (memberObj) {
-    if (this.getUser(memberObj) == null) {
+  async checkUser (memberObj) {
+    const result = await this.db.get('user', 'discord_id', memberObj.id)
+    if (result == null) {
       return false
     }
     return true
   }
 
-  getItem (itemName) {
-    return shop.store.find(item => item.item.toLowerCase() === itemName.toLowerCase())
+  async getItem (itemName) {
+    return this.db.run(`SELECT * FROM item INNER JOIN shop ON item.id = shop.item_id WHERE item.name = '${itemName.toLowerCase()}'`)
   }
 
-  buyItem (userObj, itemObj) {
-    if (userObj.balance < itemObj.cost) {
+  async buyItem (memberObj, itemName) {
+    const shopUser = await this.getUser(memberObj)
+    const shopItem = await this.getItem(itemName)
+    if (shopUser.balance < shopItem.price) {
       return 'You don\'t have enough Simbits!'
-    } else if (itemObj.stock === 0) {
-      return `The shop is out of stock of ${itemObj.item}.`
+    } else if (shopItem.stock === 0) {
+      return `The shop is out of stock of ${shopItem.name}.`
     } else {
-      this.addToInventory(userObj, itemObj)
-      this.saveShop()
-      return `${itemObj.item} has been added to your inventory!`
+      const id = await this.db.countRows('transaction')
+      await this.db.run(`UPDATE user SET balance = ${shopUser.balance - shopItem.price} WHERE discord_id = ${memberObj.id};`)
+      await this.db.run(`UPDATE shop SET stock = ${shopItem.stock - 1} WHERE item_id = ${shopItem.id};`)
+      await this.db.run(`INSERT INTO transaction (id, item_id, user_id) VALUES (${id + 1}, ${shopItem.id}, ${shopUser.id})`)
+      return `${this.toTitleCase(shopItem.name)} has been added to your inventory!`
     }
   }
 
-  addToInventory (userObj, itemObj) {
-    const inventoryItemObj = userObj.inventory.find(inventoryItem =>
-      inventoryItem.item === itemObj.item
+  toTitleCase (str) {
+    return str.replace(
+      /\w\S*/g,
+      function (txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      }
     )
-
-    if (inventoryItemObj === undefined) {
-      itemObj.stock -= 1
-      userObj.balance -= itemObj.cost
-      userObj.inventory.push({
-        item: itemObj.item,
-        quantity: 1
-      })
-    } else {
-      itemObj.stock -= 1
-      userObj.balance -= itemObj.cost
-      inventoryItemObj.quantity += 1
-    }
   }
 
-  stringifyInventory (shopUserObj) {
-    if (shopUserObj.inventory.length === 0) {
+  async stringifyInventory (shopUser) {
+    const length = await this.db.run(`SELECT COUNT(*) FROM transaction WHERE user_id = ${shopUser.id}`)
+    if (length['COUNT(*)'] === 0) {
       return 'None.'
     }
-    const inventory = shopUserObj.inventory.map(item => `${item.item} (${item.quantity}x)`).join('\n')
-    return inventory
+    const inventory = await this.db.runAll('SELECT name, COUNT(*) as count FROM transaction INNER JOIN item ON transaction.item_id = item.id GROUP BY name;')
+    return inventory.map(item => `${this.toTitleCase(item.name)} (${item.count}x)`)
   }
 
-  async saveShop () {
-    return fs.writeFile('./data/data.json', JSON.stringify(shop), (err) => console.log(err))
+  getOccurrence (array, value) {
+    return array.filter((v) => (v.name === value)).length
   }
 
   buildHelpEmbed () {
@@ -149,16 +136,17 @@ module.exports = class extends Command {
     return helpEmbed
   }
 
-  buildShopEmbed () {
+  async buildShopEmbed () {
     const prefix = this.client.options.prefix
+    const shop = await this.db.runAll('SELECT i.name, i.description, s.stock, s.price FROM item as i INNER JOIN shop as s ON i.id = s.item_id;')
     const shopEmbed = new MessageEmbed()
       .setTitle('🛒 Simbit Shop')
       .setFooter('Pssst! I wrote out the command to buy each item so you can just copy and paste it!')
-    shop.store.forEach(item => {
-      const stock = (item.stock === -1) ? '' : ` There are ${item.stock} ${item.item}(s) remaining.`
+    shop.forEach(item => {
+      const stock = (item.stock === -1) ? '' : ` There are ${item.stock} ${item.name}(s) remaining.`
       shopEmbed.addField(
-        `**${item.item}** (${item.cost} Simbits)`,
-        `${item.description}${stock}\n\`\`\`${prefix}shop buy ${item.item}\`\`\``,
+        `**${item.name}** (${item.price} Simbits)`,
+        `${item.description}${stock}\n\`\`\`${prefix}shop buy ${item.name}\`\`\``,
         false
       )
     })
