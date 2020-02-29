@@ -140,7 +140,7 @@ module.exports = class extends Command {
     if (length['COUNT(*)'] === 0) {
       return 'None.'
     }
-    const inventory = await this.db.runAll('SELECT name, COUNT(*) as count FROM transaction INNER JOIN item ON transaction.item_id = item.id GROUP BY name;')
+    const inventory = await this.db.runAll(`SELECT item.name, COUNT(transaction.item_id) AS count FROM transaction INNER JOIN user ON transaction.user_id = user.id INNER JOIN item ON transaction.item_id = item.id WHERE user.discord_id = '${shopUser.discord_id}' GROUP BY transaction.item_id`)
     return inventory.map(item => `${this.toTitleCase(item.name)} (${item.count}x)`)
   }
 
