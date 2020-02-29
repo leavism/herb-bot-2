@@ -1,20 +1,58 @@
 /* eslint-disable no-throw-literal */
 const { Command } = require('klasa')
 const { MessageEmbed } = require('discord.js')
+const shop = require('../../data/data.json')
 
 module.exports = class extends Command {
   constructor (...args) {
     super(...args, {
       subcommands: true,
       description: 'Take a look at the Simbit Shop!',
-      usage: '<bank|list|buy|help:default> [item:...string]',
+      usage: '<transfer|bank|list|buy|help:default> [item:...string]',
       usageDelim: ' '
     })
     this.db = this.client.providers.get('mysql')
   }
 
+  async transfer (message, params) {
+    const users = shop.users.map((user) => ({ name: user.name, id: user.id, inventory: user.inventory, balance: user.balance }))
+    this.asyncForEach(users, async (user) => {
+      var userExist = await this.db.get('user', 'discord_id', user.id)
+      var discordID = user.id
+      var balance = user.balance
+      if (userExist == null) {
+        await this.db.run(`INSERT INTO user (discord_id, balance) VALUES (${discordID}, ${balance});`)
+      }
+      this.asyncForEach(user.inventory, async (item) => {
+        if (item.Item.length > 50) {
+          console.log(`${item.item} is too long.`)
+        }
+        var exist = await this.db.get('item', 'name', item.Item.toLowerCase())
+        if (exist == null) {
+          await this.db.run(`INSERT INTO item (name, description) VALUES ('${item.Item.toLowerCase().replace('\'', '\'\'')}', 'None.');`)
+          // console.log(`Adding ${item.Item}(${itemID + 1}) to item table`)
+        }
+        for (let index = 0; index <= item.quantity; index++) {
+          var uID = await this.db.get('user', 'discord_id', `${user.id}`)// .then((v) => console.log(`user: ${v}`))
+          console.log(item.Item)
+          var iID = await this.db.get('item', 'name', `${item.Item.toLowerCase()}`)// .then((v) => console.log(`item: ${v}`))
+          await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${iID.id}, ${uID.id});`)
+            .catch((e) => console.log(e))
+        }
+
+        this.asyncForEach(item)
+      })
+    })
+  }
+
+  async asyncForEach (array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array)
+    }
+  }
+
   async bank (message, params) {
-    if (this.checkUser(message.author) === false) this.makeUser(message.author)
+    if (await this.checkUser(message.author) === false) await this.makeUser(message.author)
     const shopUser = await this.getUser(message.author)
     const userEmbed = new MessageEmbed()
       .setTitle(`${message.author.username}'s Shop Profile`)
@@ -39,7 +77,7 @@ module.exports = class extends Command {
   }
 
   async buy (message, [itemName]) {
-    if (this.checkUser(message.author) === false) this.makeUser(message.author)
+    if (await this.checkUser(message.author) === false) await this.makeUser(message.author)
     if (itemName == null) {
       throw 'Please specify what item you\'re trying to buy.'
     }
@@ -48,14 +86,13 @@ module.exports = class extends Command {
   }
 
   async help (message, params) {
-    if (this.checkUser(message.author) === false) this.makeUser(message.author)
+    if (await this.checkUser(message.author) === false) await this.makeUser(message.author)
     return message.send(this.buildHelpEmbed())
   }
 
   async makeUser (memberObj) {
-    const id = await this.db.countRows('user')
     const startingBalance = 0
-    await this.db.run(`INSERT INTO user (id, discord_id, balance) VALUES (${id + 1}, ${memberObj.id}, ${startingBalance})`)
+    await this.db.run(`INSERT INTO user (discord_id, balance) VALUES (${memberObj.id}, ${startingBalance})`)
   }
 
   async getUser (memberObj) {
@@ -82,10 +119,9 @@ module.exports = class extends Command {
     } else if (shopItem.stock === 0) {
       return `The shop is out of stock of ${shopItem.name}.`
     } else {
-      const id = await this.db.countRows('transaction')
       await this.db.run(`UPDATE user SET balance = ${shopUser.balance - shopItem.price} WHERE discord_id = ${memberObj.id};`)
       await this.db.run(`UPDATE shop SET stock = ${shopItem.stock - 1} WHERE item_id = ${shopItem.id};`)
-      await this.db.run(`INSERT INTO transaction (id, item_id, user_id) VALUES (${id + 1}, ${shopItem.id}, ${shopUser.id})`)
+      await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${shopItem.id}, ${shopUser.id})`)
       return `${this.toTitleCase(shopItem.name)} has been added to your inventory!`
     }
   }
