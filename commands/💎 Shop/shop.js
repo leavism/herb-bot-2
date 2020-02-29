@@ -77,7 +77,8 @@ module.exports = class extends Command {
   async buy (message, [itemName]) {
     if (await this.checkUser(message.author) === false) await this.makeUser(message.author)
     if (itemName == null) {
-      throw 'Please specify what item you\'re trying to buy.'
+      message.send('Please specify what item you\'re trying to buy.')
+      return message.send(await this.buildShopEmbed())
     }
     const shopUser = await this.getUser(message.author)
     const shopItem = await this.getItem(itemName)
@@ -121,12 +122,21 @@ module.exports = class extends Command {
     return this.db.run(`SELECT * FROM item INNER JOIN shop ON item.id = shop.item_id WHERE item.name = '${itemName.toLowerCase()}'`)
   }
 
+  /**
+   * Updates user balance, transaction record, and shop stock for the buying process
+   * @param {*} memberObj Target Discord guildMember
+   * @param {*} itemName Target item name
+   * @returns {string} of the success
+   */
   async buyItem (memberObj, itemName) {
     const shopUser = await this.getUser(memberObj)
     const shopItem = await this.getItem(itemName)
-    await this.db.run(`UPDATE user SET balance = ${shopUser.balance - shopItem.price} WHERE discord_id = ${memberObj.id};`)
-    await this.db.run(`UPDATE shop SET stock = ${shopItem.stock - 1} WHERE item_id = ${shopItem.id};`)
-    await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${shopItem.id}, ${shopUser.id})`)
+    Promise.all([
+      await this.db.run(`UPDATE user SET balance = ${shopUser.balance - shopItem.price} WHERE discord_id = ${memberObj.id};`),
+      await this.db.run(`UPDATE shop SET stock = ${shopItem.stock - 1} WHERE item_id = ${shopItem.id};`),
+      await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${shopItem.id}, ${shopUser.id})`)
+    ])
+      .catch((error) => console.log(error))
     return `${this.toTitleCase(shopItem.name)} has been added to your inventory!`
   }
 
