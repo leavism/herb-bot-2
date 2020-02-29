@@ -29,8 +29,18 @@ CREATE TABLE `item` (
   `name` varchar(50) DEFAULT NULL,
   `description` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `item`
+--
+
+LOCK TABLES `item` WRITE;
+/*!40000 ALTER TABLE `item` DISABLE KEYS */;
+INSERT INTO `item` VALUES (1,'emoji','Add a custom emoji to the server.'),(2,'command','Set your own custom command on the bot.'),(3,'discord nitro','One month of Discord Nitro!');
+/*!40000 ALTER TABLE `item` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -41,4 +51,4 @@ CREATE TABLE `item` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-02-28 19:43:00
+-- Dump completed on 2020-02-28 20:08:03
