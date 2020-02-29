@@ -30,16 +30,16 @@ module.exports = class extends Command {
     const userInfoEmbed = new MessageEmbed()
       .setAuthor(target.user.tag, target.user.displayAvatarURL())
       .setThumbnail(target.user.displayAvatarURL())
-      .setDescription(`Status: ${target.user.presence.status}`)
+      .setDescription(`Status: ${target.user.presence.status.toUpperCase()}`)
       .setColor(message.member.displayHexColor)
       .addField(
         'Joined Discord on',
-        `${this.timestamp.display(target.createdAt)}\n${createdDaysAgo}`,
+        `${this.timestamp.display(target.user.createdAt)}\n${createdDaysAgo}`,
         true
       )
       .addField(
-        'Joined Simbad on',
-        `${this.timestamp.display(message.member.joinedAt)}\n${joinedDaysAgo}`,
+        `Joined ${message.guild} on`,
+        `${this.timestamp.display(target.joinedAt)}\n${joinedDaysAgo}`,
         true
       )
       .addField(
