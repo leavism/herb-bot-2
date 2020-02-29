@@ -39,8 +39,6 @@ module.exports = class extends Command {
           await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${iID.id}, ${uID.id});`)
             .catch((e) => console.log(e))
         }
-
-        this.asyncForEach(item)
       })
     })
   }
@@ -81,6 +79,18 @@ module.exports = class extends Command {
     if (itemName == null) {
       throw 'Please specify what item you\'re trying to buy.'
     }
+    const shopUser = await this.getUser(message.author)
+    const shopItem = await this.getItem(itemName)
+    if (shopItem == null) {
+      message.send('That item isn\'t in the shop.')
+      return message.send(await this.buildShopEmbed())
+    } else if (shopItem.stock === 0) {
+      message.send(`The shop is out of stock of ${shopItem.name}.`)
+      return message.send(await this.buildShopEmbed())
+    } else if (shopUser.balance < shopItem.price) {
+      message.send('You don\'t have enough Simbits!')
+      return this.bank(message)
+    }
 
     return message.send(await this.buyItem(message.author, itemName.toLowerCase()))
   }
@@ -114,20 +124,20 @@ module.exports = class extends Command {
   async buyItem (memberObj, itemName) {
     const shopUser = await this.getUser(memberObj)
     const shopItem = await this.getItem(itemName)
-    if (shopUser.balance < shopItem.price) {
-      return 'You don\'t have enough Simbits!'
-    } else if (shopItem.stock === 0) {
-      return `The shop is out of stock of ${shopItem.name}.`
-    } else {
-      await this.db.run(`UPDATE user SET balance = ${shopUser.balance - shopItem.price} WHERE discord_id = ${memberObj.id};`)
-      await this.db.run(`UPDATE shop SET stock = ${shopItem.stock - 1} WHERE item_id = ${shopItem.id};`)
-      await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${shopItem.id}, ${shopUser.id})`)
-      return `${this.toTitleCase(shopItem.name)} has been added to your inventory!`
-    }
+    await this.db.run(`UPDATE user SET balance = ${shopUser.balance - shopItem.price} WHERE discord_id = ${memberObj.id};`)
+    await this.db.run(`UPDATE shop SET stock = ${shopItem.stock - 1} WHERE item_id = ${shopItem.id};`)
+    await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${shopItem.id}, ${shopUser.id})`)
+    return `${this.toTitleCase(shopItem.name)} has been added to your inventory!`
   }
 
-  toTitleCase (str) {
-    return str.replace(
+  /**
+   * Converts a string to title casing
+   * @param {string} string The string to title-case
+   * @returns {string}
+   * @private
+   */
+  toTitleCase (string) {
+    return string.replace(
       /\w\S*/g,
       function (txt) {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
@@ -135,6 +145,11 @@ module.exports = class extends Command {
     )
   }
 
+  /**
+   * @param {Object} [shopUser] The user object from database
+   * @returns {array} An array of stringified items in the user's inventory
+   * @private
+   */
   async stringifyInventory (shopUser) {
     const length = await this.db.run(`SELECT COUNT(*) FROM transaction WHERE user_id = ${shopUser.id}`)
     if (length['COUNT(*)'] === 0) {
@@ -144,10 +159,11 @@ module.exports = class extends Command {
     return inventory.map(item => `${this.toTitleCase(item.name)} (${item.count}x)`)
   }
 
-  getOccurrence (array, value) {
-    return array.filter((v) => (v.name === value)).length
-  }
-
+  /**
+   * Builds the default display when using the shop command
+   * @returns {MessageEmbed}
+   * @private
+   */
   buildHelpEmbed () {
     const prefix = this.client.options.prefix
     const helpEmbed = new MessageEmbed()
@@ -172,6 +188,11 @@ module.exports = class extends Command {
     return helpEmbed
   }
 
+  /**
+   * Builds the MessageEmbed displaying items for sale in the shop
+   * @returns {MessageEmbed}
+   * @private
+   */
   async buildShopEmbed () {
     const prefix = this.client.options.prefix
     const shop = await this.db.runAll('SELECT i.name, i.description, s.stock, s.price FROM item as i INNER JOIN shop as s ON i.id = s.item_id;')
