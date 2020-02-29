@@ -202,7 +202,7 @@ module.exports = class extends Command {
     shop.forEach(item => {
       const stock = (item.stock === -1) ? '' : ` There are ${item.stock} ${item.name}(s) remaining.`
       shopEmbed.addField(
-        `**${item.name}** (${item.price} Simbits)`,
+        `**${this.toTitleCase(item.name)}** (${item.price} Simbits)`,
         `${item.description}${stock}\n\`\`\`${prefix}shop buy ${item.name}\`\`\``,
         false
       )
