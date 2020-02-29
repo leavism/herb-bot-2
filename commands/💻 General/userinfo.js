@@ -28,7 +28,7 @@ module.exports = class extends Command {
     const sortedMembers = message.guild.members.sort(this.compareJoinedAt).map(m => m.user)
 
     const userInfoEmbed = new MessageEmbed()
-      .setTitle(target.user.tag)
+      .setAuthor(target.user.tag, target.user.displayAvatarURL())
       .setThumbnail(target.user.displayAvatarURL())
       .setColor(message.member.displayHexColor)
       .addField(

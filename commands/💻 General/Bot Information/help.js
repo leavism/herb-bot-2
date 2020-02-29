@@ -65,7 +65,7 @@ module.exports = class extends Command {
         })
     ))
     const helpEmbed = new MessageEmbed()
-      .setTitle(`${this.client.user.username}`)
+      .setAuthor(this.client.user.username, this.client.user.displayAvatarURL())
       .setDescription(`To view the commands of each group, use:\n\`\`\`${prefix}commands <group>\`\`\``)
     Object.keys(all).forEach((category) => {
       helpEmbed.addField(
