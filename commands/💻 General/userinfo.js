@@ -24,12 +24,13 @@ module.exports = class extends Command {
     const target = ((message.mentions.users.size === 0) ? message.member : message.mentions.members.first())
     const createdDaysAgo = `(${Math.round((new Date() - target.user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
     const joinedDaysAgo = `(${Math.round((new Date() - target.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const roles = (target.roles.size === 1) ? 'No roles :(' : target.roles.map(m => m.name).filter(m => m !== '@everyone').join(', ')
+    const roles = (target.roles.size === 1) ? 'No roles :(' : target.roles.map(m => m).filter(m => m.name !== '@everyone').join(' | ')
     const sortedMembers = message.guild.members.sort(this.compareJoinedAt).map(m => m.user)
 
     const userInfoEmbed = new MessageEmbed()
       .setAuthor(target.user.tag, target.user.displayAvatarURL())
       .setThumbnail(target.user.displayAvatarURL())
+      .setDescription(`Status: ${target.user.presence.status}`)
       .setColor(message.member.displayHexColor)
       .addField(
         'Joined Discord on',
@@ -44,9 +45,9 @@ module.exports = class extends Command {
       .addField(
         'Roles',
         roles,
-        true
+        false
       )
-      .setFooter(`Member #${sortedMembers.indexOf(target) + 1} | User ID: ${target.id}`)
+      .setFooter(`Member #${sortedMembers.indexOf(target.user) + 1} | User ID: ${target.id}`)
     return userInfoEmbed
   }
 
