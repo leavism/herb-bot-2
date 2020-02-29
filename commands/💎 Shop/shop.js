@@ -32,7 +32,7 @@ module.exports = class extends Command {
           await this.db.run(`INSERT INTO item (name, description) VALUES ('${item.Item.toLowerCase().replace('\'', '\'\'')}', 'None.');`)
           // console.log(`Adding ${item.Item}(${itemID + 1}) to item table`)
         }
-        for (let index = 0; index <= item.quantity; index++) {
+        for (let index = 0; index < item.quantity; index++) {
           var uID = await this.db.get('user', 'discord_id', `${user.id}`)// .then((v) => console.log(`user: ${v}`))
           console.log(item.Item)
           var iID = await this.db.get('item', 'name', `${item.Item.toLowerCase()}`)// .then((v) => console.log(`item: ${v}`))
