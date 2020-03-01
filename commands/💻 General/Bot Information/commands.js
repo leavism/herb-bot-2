@@ -10,10 +10,6 @@ module.exports = class extends Command {
       usage: '<Category:category>',
       extendedHelp: 'This only works with command categories. Use the `help` command to see all categories.'
     })
-
-    this.createCustomResolver('category', (arg, possible, message) => {
-      return this.client.arguments.get('category').run(arg, possible, message)
-    })
   }
 
   async run (message, [category]) {
