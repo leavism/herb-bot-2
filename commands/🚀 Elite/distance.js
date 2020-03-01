@@ -9,9 +9,9 @@ module.exports = class extends Command {
       aliases: ['dist'],
       runIn: ['dm', 'text'],
       description: 'Find the distance between two systems.',
-      usage: '<SystemA:string> <SystemB:string>',
+      usage: '<System_Name:string> <System_Name:string>',
       usageDelim: ',',
-      usageHelp: 'Don\'t forget the comma between the two system names.'
+      extendedHelp: 'Don\'t forget the comma between the two system names.'
     })
 
     this.createCustomResolver('system', (arg, possible, message) => {
