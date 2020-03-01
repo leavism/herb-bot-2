@@ -33,13 +33,11 @@ module.exports = class extends Command {
       .setDescription(command.description)
       .addField(
         '🛠 Aliase(s)',
-        (command.aliases.length > 0) ? command.aliases : 'None.',
-        false
+        (command.aliases.length > 0) ? command.aliases : 'None.'
       )
       .addField(
         '📝 Format',
-        (command.usage.fullUsage(message).length > 0) ? `\`\`\`${command.usage.fullUsage(message)}\`\`\`` : 'No examples.',
-        false
+        (command.usage.fullUsage(message).length > 0) ? `\`\`\`${command.usage.fullUsage(message)}\`\`\`` : 'No examples.'
       )
       .addField(
         '💡 Notes',
