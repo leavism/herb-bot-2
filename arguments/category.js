@@ -1,33 +1,62 @@
-const { Argument } = require('klasa');
-const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+const { Argument } = require('klasa')
+const { MessageEmbed } = require('discord.js')
+const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key)
 
 function removeEmojis (string) {
-  var regex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g;
-  return string.replace(regex, '');
+  var regex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g
+  return string.replace(regex, '')
 }
 
-function cleanUpName(string){
-  return removeEmojis(string).toLowerCase().trim();
+function cleanUpName (string) {
+  return removeEmojis(string).toLowerCase().trim()
 }
 
 module.exports = class extends Argument {
-
-    async run(arg, possible, message) {
-      const categories = [];
-      await Promise.all(this.client.commands.map((command) =>
-        this.client.inhibitors.run(message,command, true)
+  async run (arg, possible, message) {
+    const categories = []
+    await Promise.all(this.client.commands.map((command) =>
+      this.client.inhibitors.run(message, command, true)
         .then(() => {
-          if (!categories.includes(cleanUpName(command.category))) categories.push(cleanUpName(command.category));
+          if (!categories.includes(cleanUpName(command.category))) categories.push(cleanUpName(command.category))
         })
         .catch(() => {
           // To pass over commands not included.
         })
-      ));
-      arg = removeEmojis(arg).trim().toLowerCase()
-      if (categories.indexOf(arg) >= 0) {
-        return arg
-      } else {
-        throw "That was an invalid category. Try `?help` to see all the categories."
-      }
+    ))
+    arg = removeEmojis(arg).trim().toLowerCase()
+    if (categories.indexOf(arg) >= 0) {
+      return arg
+    } else {
+      // Used .then to send embed instead of await so that the throw message is sent first before the embed
+      this.buildHelpEmbed(message)
+        .then((embed) => message.send(embed))
+      throw 'That was an invalid category. Try one of the follow:'
     }
-};
+  }
+
+  async buildHelpEmbed (message) {
+    const { prefix } = message.guildSettings
+    const all = {}
+    await Promise.all(this.client.commands.map((command) =>
+      this.client.inhibitors.run(message, command, true)
+        .then(() => {
+          if (!has(all, command.category)) all[command.category] = []
+          all[command.category].push(command)
+        })
+        .catch(() => {
+          // To pass over commands that aren't included.
+        })
+    ))
+    const helpEmbed = new MessageEmbed()
+      .setAuthor(this.client.user.username, this.client.user.displayAvatarURL())
+      .setDescription(`To view the commands of each group, use:\n\`\`\`${prefix}commands <group>\`\`\``)
+    Object.keys(all).forEach((category) => {
+      helpEmbed.addField(
+        category,
+        `${all[category].length} commands`,
+        true
+      )
+    })
+    return helpEmbed
+  }
+}
