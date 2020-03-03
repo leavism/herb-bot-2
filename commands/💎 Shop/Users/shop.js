@@ -1,7 +1,7 @@
 /* eslint-disable no-throw-literal */
 const { Command } = require('klasa')
 const { MessageEmbed } = require('discord.js')
-const shop = require('../../data/data.json')
+const shop = require('../../../data/data.json')
 
 module.exports = class extends Command {
   constructor (...args) {
@@ -43,12 +43,6 @@ module.exports = class extends Command {
     })
   }
 
-  async asyncForEach (array, callback) {
-    for (let index = 0; index < array.length; index++) {
-      await callback(array[index], index, array)
-    }
-  }
-
   async bank (message, params) {
     if (await this.checkUser(message.author) === false) await this.makeUser(message.author)
     const shopUser = await this.getUser(message.author)
@@ -81,7 +75,7 @@ module.exports = class extends Command {
       return message.send(await this.buildShopEmbed())
     }
     const shopUser = await this.getUser(message.author)
-    const shopItem = await this.getItem(itemName)
+    const shopItem = await this.getShopItem(itemName)
     if (shopItem == null) {
       message.send('That item isn\'t in the shop.')
       return message.send(await this.buildShopEmbed())
@@ -118,7 +112,7 @@ module.exports = class extends Command {
     return true
   }
 
-  async getItem (itemName) {
+  async getShopItem (itemName) {
     return this.db.run(`SELECT * FROM item INNER JOIN shop ON item.id = shop.item_id WHERE item.name = '${itemName.toLowerCase()}'`)
   }
 
@@ -130,7 +124,7 @@ module.exports = class extends Command {
    */
   async buyItem (memberObj, itemName) {
     const shopUser = await this.getUser(memberObj)
-    const shopItem = await this.getItem(itemName)
+    const shopItem = await this.getShopItem(itemName)
     Promise.all([
       await this.db.run(`UPDATE user SET balance = ${shopUser.balance - shopItem.price} WHERE discord_id = ${memberObj.id};`),
       await this.db.run(`UPDATE shop SET stock = ${shopItem.stock - 1} WHERE item_id = ${shopItem.id};`),
@@ -218,5 +212,11 @@ module.exports = class extends Command {
       )
     })
     return shopEmbed
+  }
+
+  async asyncForEach (array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array)
+    }
   }
 }
