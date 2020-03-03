@@ -15,6 +15,9 @@ module.exports = class extends Command {
 
   async run (message, [member, amount]) {
     if (await this.checkUser(member) === false) await this.makeUser(member)
+    const shopUser = await this.getUser(member)
+    if (amount > shopUser.balance) return message.send(`Cannot deduct more than ${member}'s balance of ${shopUser.balance}`)
+    if (amount <= 0) return message.send('Cannot deduct less than 1 Simbit.')
     await this.deductUser(member, amount)
     return message.send(`${member} had ${amount} Simbits deducted.`)
   }
@@ -29,15 +32,20 @@ module.exports = class extends Command {
   }
 
   /**
+   * Gets the user record in user table of a guild member
+   * @param {guildMember} memberObj - Target guild member
+   * @returns {shopUser} - User record object from user table
+   */
+  async getUser (memberObj) {
+    return this.db.get('user', 'discord_id', memberObj.id)
+  }
+
+  /**
    * Deduct an amount of Simbits from a shop user
    * @param {guildMember} memberObj - The target guild member
    * @param {integer} amount - The amount to deduct from shop user
    */
   async deductUser (memberObj, amount) {
-    const shopUser = await this.db.get('user', 'discord_id', memberObj.id)
-    if (amount > shopUser.balance) {
-      throw `Cannot deduct more than ${memberObj}'s balance of ${shopUser.balance}`
-    }
     return this.db.run(`UPDATE user SET balance = balance - ${amount} WHERE discord_id = ${memberObj.id}`)
   }
 

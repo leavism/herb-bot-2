@@ -15,12 +15,11 @@ module.exports = class extends Command {
 
   async run (message, [member, amount]) {
     if (await this.checkUser(member) === false) await this.makeUser(member)
-    const awarded = await this.awardUser(member, amount)
-    if (awarded) {
-      return message.send(`${member} has been awarded ${amount} Simbits!`)
-    } else {
-      return message.send('That would exceed the maximum balance of 2147483647 Simbits.')
-    }
+    const shopUser = await this.getUser(member)
+    if (shopUser.balance + amount >= 2147483647) return message.send('That would exceed the maximum balance of 2147483647 Simbits.')
+    if (amount <= 0) return message.send('Cannot award less than 1 Simbit.')
+    await this.awardUser(member, amount)
+      .then(message.send(`${member} has been awarded ${amount} Simbits! Their balance is now ${shopUser.balance}`))
   }
 
   /**
@@ -32,11 +31,22 @@ module.exports = class extends Command {
     await this.db.run(`INSERT INTO user (discord_id, balance) VALUES (${memberObj.id}, ${startingBalance})`)
   }
 
+  /**
+   * Add Simbits to a shop user's balance
+   * @param {guildMember} memberObj - The target guild member
+   * @param {integer} amount - The amount to award
+   */
   async awardUser (memberObj, amount) {
-    const shopUser = await this.db.get('user', 'discord_id', memberObj.id)
-    if (shopUser.balance + amount >= 2147483647) return false
     this.db.run(`UPDATE user SET balance = balance + ${amount} WHERE discord_id = ${memberObj.id}`)
-    return true
+  }
+
+  /**
+   * Gets the user record in user table of a guild member
+   * @param {guildMember} memberObj - Target guild member
+   * @returns {shopUser} - User record object from user table
+   */
+  async getUser (memberObj) {
+    return this.db.get('user', 'discord_id', memberObj.id)
   }
 
   /**
