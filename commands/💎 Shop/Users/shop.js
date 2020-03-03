@@ -95,15 +95,28 @@ module.exports = class extends Command {
     return message.send(this.buildHelpEmbed())
   }
 
+  /**
+   * Add guild member into the user table
+   * @param {guildMember} memberObj - The target guild member
+   */
   async makeUser (memberObj) {
     const startingBalance = 0
     await this.db.run(`INSERT INTO user (discord_id, balance) VALUES (${memberObj.id}, ${startingBalance})`)
   }
 
+  /**
+   * Gets the shop user from the user table based on discord_id
+   * @param {guildMember} memberObj - The target guild member
+   */
   async getUser (memberObj) {
     return this.db.get('user', 'discord_id', memberObj.id)
   }
 
+  /**
+   * Checks if guild member is in the user table
+   * @param {guildMember} memberObj - The target guild member
+   * @returns {boolean} - Whether guild member is in user table (true) or not in the table (false)
+   */
   async checkUser (memberObj) {
     const result = await this.db.get('user', 'discord_id', memberObj.id)
     if (result == null) {
