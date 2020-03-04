@@ -25,17 +25,14 @@ module.exports = class extends Command {
       }
       this.asyncForEach(user.inventory, async (item) => {
         if (item.Item.length > 50) {
-          console.log(`${item.item} is too long.`)
         }
         var exist = await this.db.get('item', 'name', item.Item.toLowerCase())
         if (exist == null) {
           await this.db.run(`INSERT INTO item (name, description) VALUES ('${item.Item.toLowerCase().replace('\'', '\'\'')}', 'None.');`)
-          // console.log(`Adding ${item.Item}(${itemID + 1}) to item table`)
         }
         for (let index = 0; index < item.quantity; index++) {
-          var uID = await this.db.get('user', 'discord_id', `${user.id}`)// .then((v) => console.log(`user: ${v}`))
-          console.log(item.Item)
-          var iID = await this.db.get('item', 'name', `${item.Item.toLowerCase()}`)// .then((v) => console.log(`item: ${v}`))
+          var uID = await this.db.get('user', 'discord_id', `${user.id}`)
+          var iID = await this.db.get('item', 'name', `${item.Item.toLowerCase()}`)
           await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${iID.id}, ${uID.id});`)
             .catch((e) => console.log(e))
         }
