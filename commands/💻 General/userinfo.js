@@ -9,37 +9,41 @@ module.exports = class extends Command {
       runIn: ['text'],
       cooldown: 3,
       description: 'Get basic user information!',
-      usage: '[mention:user]',
+      usage: '[mention:member]',
       extendedHelp: 'You can mention another user for their user information. If you don\'t, it\'ll pull out author information.'
     })
     this.timestamp = new Timestamp('MMMM d YYYY')
   }
 
-  async run (message, [...params]) {
-    return message.send(await this.buildUserInfoEmbed(message))
+  async run (message, [target]) {
+    target = target || message.member
+    return message.send(await this.buildTargetInfoEmbed(target))
   }
 
-  async buildUserInfoEmbed (message) {
+  /**
+   * Builds a message embed containing information about a guild member
+   * @param {guildMember} memberObj - The target guild member
+   */
+  async buildTargetInfoEmbed (memberObj) {
     // If no user mention, then info pulled about author
-    const target = ((message.mentions.users.size === 0) ? message.member : message.mentions.members.first())
-    const createdDaysAgo = `(${Math.round((new Date() - target.user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const joinedDaysAgo = `(${Math.round((new Date() - target.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const roles = (target.roles.size === 1) ? 'No roles :(' : target.roles.map(m => m).filter(m => m.name !== '@everyone').join(' ')
-    const sortedMembers = message.guild.members.sort(this.compareJoinedAt).map(m => m.user)
+    const createdDaysAgo = `(${Math.round((new Date() - memberObj.user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
+    const joinedDaysAgo = `(${Math.round((new Date() - memberObj.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
+    const roles = (memberObj.roles.size === 1) ? 'No roles :(' : memberObj.roles.map(m => m).filter(m => m.name !== '@everyone').join(' ')
+    const sortedMembers = memberObj.guild.members.sort(this.compareJoinedAt).map(m => m.user)
 
     const userInfoEmbed = new MessageEmbed()
-      .setAuthor(`${target.user.tag} ${(target.nickname) ? `(${target.nickname})` : ''}`, target.user.displayAvatarURL())
-      .setThumbnail(target.user.displayAvatarURL())
-      .setDescription(`${target.user}`)
-      .setColor(message.member.displayHexColor)
+      .setAuthor(`${memberObj.user.tag} ${(memberObj.nickname) ? `(${memberObj.nickname})` : ''}`, memberObj.user.displayAvatarURL())
+      .setThumbnail(memberObj.user.displayAvatarURL())
+      .setDescription(`${memberObj.user}`)
+      .setColor(memberObj.displayHexColor)
       .addField(
         'Joined Discord on',
-        `${this.timestamp.display(target.user.createdAt)}\n${createdDaysAgo}`,
+        `${this.timestamp.display(memberObj.user.createdAt)}\n${createdDaysAgo}`,
         true
       )
       .addField(
-        `Joined ${message.guild} on`,
-        `${this.timestamp.display(target.joinedAt)}\n${joinedDaysAgo}`,
+        `Joined ${memberObj.guild} on`,
+        `${this.timestamp.display(memberObj.joinedAt)}\n${joinedDaysAgo}`,
         true
       )
       .addField(
@@ -47,7 +51,7 @@ module.exports = class extends Command {
         roles,
         false
       )
-      .setFooter(`Member #${sortedMembers.indexOf(target.user) + 1} | User ID: ${target.id}`)
+      .setFooter(`Member #${sortedMembers.indexOf(memberObj.user) + 1} | User ID: ${memberObj.id}`)
     return userInfoEmbed
   }
 
