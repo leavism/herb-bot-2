@@ -6,6 +6,7 @@ module.exports = class extends Command {
     super(...args, {
       name: 'deduct',
       description: 'Deduct Simbits from someone.',
+      permissionLevel: 9,
       usage: '<User:member> <Amount:integer>',
       usageDelim: ' ',
       extendedHelp: 'Separate the user mention from the amount deducted with a space.'

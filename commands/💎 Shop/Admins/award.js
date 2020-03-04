@@ -6,6 +6,7 @@ module.exports = class extends Command {
     super(...args, {
       name: 'award',
       description: 'Award someone Simbits.',
+      permissionLevel: 9,
       usage: '<User:member> <Amount:integer>',
       usageDelim: ' ',
       extendedHelp: 'Separate the user mention from the amount awarded with a space.'

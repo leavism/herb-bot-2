@@ -7,6 +7,7 @@ module.exports = class extends Command {
     super(...args, {
       name: 'redeem',
       description: 'Redeem an item from a user\'s inventory.',
+      permissionLevel: 9,
       usage: '<User:member> [Item_Name:...string]',
       usageDelim: ' ',
       extendedHelp: 'Separate the user mention from the item name with a space. Any subsequent spaces after that first space is included in the item name. Notice that the Item_Name argument is only optional.'
