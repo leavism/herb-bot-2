@@ -7,7 +7,8 @@ module.exports = class extends Monitor {
     super(...args, {
       name: 'profanityAlert',
       enabled: true,
-      ignoreOthers: false
+      ignoreOthers: false,
+      ignoreEdits: false
     })
   }
 
