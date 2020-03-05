@@ -56,9 +56,14 @@ module.exports = class extends Command {
     return userInfoEmbed
   }
 
-  compareJoinedAt (a, b) {
-    if (a.joinedAt > b.joinedAt) return 1
-    else if (a.joinedAt < b.joinedAt) return -1
+  /**
+   * Compare function for joinedAt date
+   * @param {guildMember} firstMember - First member to compare with the second member
+   * @param {guildMember} secondMember - The second member being compared to
+   */
+  compareJoinedAt (firstMember, secondMember) {
+    if (firstMember.joinedAt > secondMember.joinedAt) return 1
+    else if (firstMember.joinedAt < secondMember.joinedAt) return -1
     return 0
   }
 }

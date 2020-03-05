@@ -38,6 +38,10 @@ module.exports = class extends Command {
     await message.send(`The distance between ${systemACoords.name} and ${systemBCoords.name} is **${distance.toFixed(2)}**LY`)
   };
 
+  /**
+   * Calls the EDSM API to find the coordinates of a system
+   * @param {string} system - The name of the system
+   */
   async getCoords (system) {
     system = system.replace('+', '%2B').replace(' ', '+')
     const url = `https://www.edsm.net/api-v1/system?sysname=${system}&coords=1`
