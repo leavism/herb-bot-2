@@ -5,6 +5,7 @@ module.exports = class extends Command {
   constructor (...args) {
     super(...args, {
       name: 'userinfo',
+      aliases: ['userinf', 'ui'],
       enabled: 'true',
       runIn: ['text'],
       cooldown: 3,
