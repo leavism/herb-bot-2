@@ -28,6 +28,7 @@ module.exports = class extends Argument {
       // Used .then to send embed instead of await so that the throw message is sent first before the embed
       this.buildHelpEmbed(message)
         .then((embed) => message.send(embed))
+      // eslint-disable-next-line no-throw-literal
       throw 'That was an invalid category. Try one of the follow:'
     }
   }

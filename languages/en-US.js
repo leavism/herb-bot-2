@@ -45,7 +45,7 @@ module.exports = class extends Language {
       RESOLVER_MINMAX_MAX: (name, max, suffix) => `${name} must be less than ${max}${suffix}.`,
       REACTIONHANDLER_PROMPT: 'Which page would you like to jump to?',
       COMMANDMESSAGE_MISSING: 'Missing one or more required arguments after end of input.',
-      COMMANDMESSAGE_MISSING_REQUIRED: (name, command) => `\`${name}\` is a required argument. Try \`${this.client.options.prefix}help ${command}\` for more details on how to use the command.`,
+      COMMANDMESSAGE_MISSING_REQUIRED: (name, command) => `\`${name}\` is a required argument. Try \`${this.client.options.prefix}commands ${command}\` for more details on how to use the command.`,
       COMMANDMESSAGE_MISSING_OPTIONALS: (possibles) => `Missing a required option: (${possibles})`,
       COMMANDMESSAGE_NOMATCH: (possibles) => `Your option didn't match any of the possibilities: (${possibles})`,
       // eslint-disable-next-line max-len
