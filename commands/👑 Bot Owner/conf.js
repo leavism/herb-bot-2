@@ -4,7 +4,7 @@ module.exports = class extends Command {
   constructor (...args) {
     super(...args, {
       runIn: ['text'],
-      permissionLevel: 6,
+      permissionLevel: 9,
       guarded: true,
       subcommands: true,
       description: 'Define per-guild settings.',
