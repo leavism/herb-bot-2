@@ -20,7 +20,7 @@ module.exports = class extends Command {
     if (shopUser.balance + amount >= 2147483647) return message.send('That would exceed the maximum balance of 2147483647 Simbits.')
     if (amount <= 0) return message.send('Cannot award less than 1 Simbit.')
     await this.awardUser(member, amount)
-      .then(message.send(`${member} has been awarded ${amount} Simbits! Their balance is now ${shopUser.balance}`))
+      .then(message.send(`${member} has been awarded ${amount} Simbits! Their balance is now ${shopUser.balance + amount}`))
   }
 
   /**
