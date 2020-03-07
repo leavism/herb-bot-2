@@ -18,11 +18,11 @@ module.exports = class extends Command {
   async run (message, [command]) {
     if (!(command in customCommands)) {
       const allCustomCommands = Object.getOwnPropertyNames(customCommands)
-      return message.send(`'${command}' isn't a custom command. Here is a list of commands:\n\`\`\`${allCustomCommands.sort().join('\n')}\`\`\``)
+      return message.send(`\`${this.client.options.prefix}${command}\` isn't a custom command. Here is a list of commands:\n\`\`\`${allCustomCommands.sort().join('\n')}\`\`\``)
     }
     delete customCommands[command]
     await this.saveCommands()
-    return message.send(`'${command}' has been removed from custom commands.`)
+    return message.send(`\`${this.client.options.prefix}${command}\` has been removed from custom commands.`)
   }
 
   async saveCommands () {

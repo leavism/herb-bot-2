@@ -10,7 +10,7 @@ module.exports = class extends Command {
       aliases: ['ca'],
       permissionLevel: 7,
       description: 'Add a new custom command.',
-      usage: '<Customcommand:string> <Response:...string>',
+      usage: '<Command:string> <Response:...string>',
       usageDelim: ' ',
       extendedHelp: 'The name of the custom command will be the first word. Anything after the first space will be the custom command response, including any subsequent spaces.'
     })
@@ -22,7 +22,7 @@ module.exports = class extends Command {
     }
     customCommands[command] = response
     await this.saveCommands()
-    return message.send(`\`${command}\` has to set to: \`\`\`${response}\`\`\``)
+    return message.send(`\`${this.client.options.prefix}${command}\` has to set to: \`\`\`${response}\`\`\``)
   }
 
   async saveCommands () {
