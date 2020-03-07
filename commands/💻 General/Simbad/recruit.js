@@ -17,9 +17,11 @@ module.exports = class extends Command {
     const elite = message.guild.roles.find(role => role.name === 'Elite')
     const simbian = message.guild.roles.find(role => role.name === 'Simbian')
     const recruitRoles = [recruit, elite, simbian]
+    const currentRoles = member.roles.map(role => role)
+    const alreadySimbian = currentRoles.filter(cRole => recruitRoles.includes(cRole))
 
-    const alreadyRecruit = recruitRoles.find(role => member.roles.map().includes(role))
-    console.log(alreadyRecruit)
+    if (alreadySimbian.length !== 0) return message.send('They\'re already Simbian.')
+    if (!member.manageable) return message.send('They have a higher role than me!')
 
     return member.roles.add([recruit, elite, simbian], `${message.member.user.tag} called the recruit command on ${member.user.tag}`)
       .then(message.send(`${member} has been recruited!`))
