@@ -22,7 +22,7 @@ module.exports = class extends Command {
     }
     customCommands[command] = response
     await this.saveCommands()
-    return message.send(`\`${this.client.options.prefix}${command}\` has to set to: \`\`\`${response}\`\`\``)
+    return message.send(`\`${this.client.options.prefix}${command}\` has been set to: \`\`\`${response}\`\`\``)
   }
 
   async saveCommands () {
