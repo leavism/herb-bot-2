@@ -6,7 +6,7 @@ module.exports = class extends Command {
     super(...args, {
       name: 'clist',
       enabled: true,
-      aliases: ['cl'],
+      aliases: ['cl', 'cc'],
       permissionLevel: 0,
       description: 'List all custom commands.'
     })
