@@ -1,6 +1,5 @@
 const { Command } = require('klasa')
 const jRoles = require('../../data/joinable.json')
-const fs = require('fs')
 
 module.exports = class extends Command {
   constructor (...args) {
