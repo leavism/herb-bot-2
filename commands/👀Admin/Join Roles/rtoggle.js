@@ -9,16 +9,17 @@ module.exports = class extends Command {
       enabled: true,
       aliases: ['rt', 'roletoggle'],
       permissionLevel: 7,
-      description: 'Toggle where people can use the role command on a role.',
-      usage: '<Role:role>',
+      description: 'Toggle whether people can use the role command on a role.',
+      usage: '[Role:role]',
       extendedHelp: ''
     })
   }
 
   async run (message, [role]) {
+    if (!role) return message.send(`Here is a list of roles people can join: ${this.buildRoleList()} Use \`${this.client.options.prefix}rtoggle @rolemention\` if you want to toggle a role.`)
     if (jRoles.joinable.includes(role.name)) {
       jRoles.joinable.splice(jRoles.joinable.indexOf(role.name), 1)
-      return message.send(`${role.name} is no longer jonable. Here's a list of roles people can joinse: ${this.buildRoleList()}`)
+      return message.send(`${role.name} is no longer jonable. Here's a list of roles people can join: ${this.buildRoleList()}`)
     } else {
       jRoles.joinable.push(role.name)
       await this.saveJoinables()
