@@ -5,15 +5,17 @@ module.exports = class extends Command {
   constructor (...args) {
     super(...args, {
       name: 'role',
+      aliases: ['roles'],
       enabled: true,
-      description: 'Join or leave a role. If you already have a role, this will remove it.',
-      usage: '<Role:...string>',
+      description: 'Add or remove a role. If you already have a role, the command will remove it.',
+      usage: '[Role:...string]',
       extendedHelp: 'Do not mention the role you\'re trying to join.'
     })
   }
 
   async run (message, [targetRole]) {
-    if (!message.member.manageable) return message.send('You have a higher permission than me!')
+    if (!targetRole) return message.send(`You didn't specify a role. Do **not** mention the role. Use \`${this.client.options.prefix}roles [role]\` to add or remove a role.\nHere's a list of roles you can join: ${this.buildRoleList()}`)
+    if (!message.member.manageable) return message.send('You have a higher permissions than me!')
 
     const roleExist = message.guild.roles.find(role => role.name.toLowerCase() === targetRole.toLowerCase())
     if (!roleExist) return message.send(`'${targetRole}' isn't a role on this server.`)
@@ -29,5 +31,9 @@ module.exports = class extends Command {
       message.member.roles.add(roleExist, `${message.member} used the join command.`)
       return message.send(`You now have the ${roleExist.name} role!`)
     }
+  }
+
+  buildRoleList () {
+    return `\`\`\`${jRoles.joinable.join('\n')}\`\`\``
   }
 }
