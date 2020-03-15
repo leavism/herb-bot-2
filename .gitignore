@@ -3,3 +3,4 @@ config.js
 /data
 .DS_Store*
 .eslintrc.json
+.vscode/settings.json
