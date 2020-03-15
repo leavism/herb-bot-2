@@ -27,7 +27,7 @@ CREATE TABLE `config` (
   `key` varchar(45) DEFAULT NULL,
   `value` varchar(2200) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,7 +36,7 @@ CREATE TABLE `config` (
 
 LOCK TABLES `config` WRITE;
 /*!40000 ALTER TABLE `config` DISABLE KEYS */;
-INSERT INTO `config` VALUES (1,'mod_channel','mod-log'),(2,'recruit_role','recruit'),(3,'regular_role','regular');
+INSERT INTO `config` VALUES (1,'mod_channel','mod-log'),(2,'recruit_role','recruit'),(3,'regular_role','regular'),(4,'general_channel','general'),(5,'shop_channel','shop-log');
 /*!40000 ALTER TABLE `config` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -49,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-04 17:45:12
+-- Dump completed on 2020-03-14 18:41:56

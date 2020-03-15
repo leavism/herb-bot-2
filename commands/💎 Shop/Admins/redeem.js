@@ -17,15 +17,20 @@ module.exports = class extends Command {
 
   async run (message, [member, itemName]) {
     if (await this.checkUser(member) === false) await this.makeUser(member)
+
     if (itemName === undefined) {
       return message.send(await this.buildInventoryEmbed(member))
     }
+
     itemName = itemName.toLowerCase()
     if (!(await this.redeemItem(member, itemName))) {
       message.send(`'${this.toTitleCase(itemName)}' wasn't in their inventory. Here is their inventory:`)
       return message.send(await this.buildInventoryEmbed(member))
     } else {
-      return message.send(`'${this.toTitleCase(itemName)}' was redeemed from ${member.user.username}'s inventory.`)
+      message.send(`'${this.toTitleCase(itemName)}' was redeemed from ${member.user.username}'s inventory.`)
+      let shopLogChannel = await this.db.get('config', 'key', 'shop_channel')
+      shopLogChannel = message.guild.channels.find(channel => channel.name === shopLogChannel.value)
+      shopLogChannel.send(await this.buildShopLogEmbed({ message, member, itemName }))
     }
   }
 
@@ -52,10 +57,17 @@ module.exports = class extends Command {
   }
 
   /**
+   * Gets the shop user from the user table based on discord_id
+   * @param {guildMember} memberObj - The target guild member
+   */
+  async getUser (memberObj) {
+    return this.db.get('user', 'discord_id', memberObj.id)
+  }
+
+  /**
    * Gets a record from the item table
    * @param {string} itemName
    */
-
   async getItem (itemName) {
     return this.db.get('item', 'name', itemName)
   }
@@ -117,6 +129,46 @@ module.exports = class extends Command {
       })
     }
     return inventoryEmbed
+  }
+
+  async stringifyInventory (shopUser) {
+    const length = await this.db.run(`SELECT COUNT(*) FROM transaction WHERE user_id = ${shopUser.id}`)
+    if (length['COUNT(*)'] === 0) {
+      return 'None.'
+    }
+    const inventory = await this.db.runAll(`SELECT item.name, COUNT(transaction.item_id) AS count FROM transaction INNER JOIN user ON transaction.user_id = user.id INNER JOIN item ON transaction.item_id = item.id WHERE user.discord_id = '${shopUser.discord_id}' GROUP BY transaction.item_id`)
+    return inventory.map(item => `${this.toTitleCase(item.name)} (${item.count}x)`)
+  }
+
+  async buildShopLogEmbed (data) {
+    const shopLogEmbed = new MessageEmbed()
+      .setTitle('Item Redeem')
+      .setDescription(`${data.message.member} redeemed an item for ${data.member}.`)
+      .setColor([74, 141, 255])
+      .addField(
+        'Customer',
+        data.member,
+        true
+      )
+      .addField(
+        'Redeemed Item',
+        data.itemName,
+        true
+      )
+      .addField(
+        'New Inventory',
+        await this.stringifyInventory(await this.getUser(data.member)),
+        true
+      )
+      .addField(
+        'Message Link',
+        `[Click Here](${this.messageLinkGenerator(data.message)})`
+      )
+    return shopLogEmbed
+  }
+
+  messageLinkGenerator (message) {
+    return `https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`
   }
 
   /**

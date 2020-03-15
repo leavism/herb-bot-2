@@ -84,7 +84,41 @@ module.exports = class extends Command {
       return this.bank(message)
     }
 
-    return message.send(await this.buyItem(message.author, itemName.toLowerCase()))
+    message.send(await this.buyItem(message.author, itemName.toLowerCase()))
+    let shopLogChannel = await this.db.get('config', 'key', 'shop_channel')
+    shopLogChannel = message.guild.channels.find(channel => channel.name === shopLogChannel.value)
+    shopLogChannel.send(await this.buildShopLogEmbed({ message, itemName, shopUser }))
+  }
+
+  async buildShopLogEmbed (data) {
+    const shopLogEmbed = new MessageEmbed()
+      .setTitle('Item Purchase')
+      .setDescription(`${data.message.member} purchased an item.`)
+      .setColor([74, 141, 255])
+      .addField(
+        'Customer',
+        data.message.member,
+        true
+      )
+      .addField(
+        'Purchased Item',
+        data.itemName,
+        true
+      )
+      .addField(
+        'New Inventory',
+        await this.stringifyInventory(data.shopUser),
+        true
+      )
+      .addField(
+        'Message Link',
+        `[Click Here](${this.messageLinkGenerator(data.message)})`
+      )
+    return shopLogEmbed
+  }
+
+  messageLinkGenerator (message) {
+    return `https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`
   }
 
   async help (message, params) {
