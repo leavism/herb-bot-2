@@ -11,7 +11,7 @@ module.exports = class extends Command {
       usage: '<transfer|bank|list|buy|help:default> [item:...string]',
       usageDelim: ' '
     })
-    this.db = this.client.providers.get('mysql')
+    this.db = this.client.providers.get('simbad')
   }
 
   async transfer (message, params) {

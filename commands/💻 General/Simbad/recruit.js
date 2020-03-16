@@ -10,7 +10,7 @@ module.exports = class extends Command {
       usage: '<Mention:member>',
       extendedHelp: 'Don\'t forget to mention the use.'
     })
-    this.db = this.client.providers.get('mysql')
+    this.db = this.client.providers.get('simbad')
   }
 
   async run (message, [member]) {

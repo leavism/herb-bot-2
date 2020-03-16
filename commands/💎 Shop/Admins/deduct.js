@@ -12,7 +12,7 @@ module.exports = class extends Command {
       usageDelim: ' ',
       extendedHelp: 'Separate the user mention from the amount deducted with a space.'
     })
-    this.db = this.client.providers.get('mysql')
+    this.db = this.client.providers.get('simbad')
   }
 
   async run (message, [member, amount]) {

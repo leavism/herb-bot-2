@@ -16,7 +16,7 @@ const TIMEPARSERS = {
 
 module.exports = class extends SQLProvider {
   constructor (...args) {
-    super(...args, { name: 'simbad' })
+    super(...args, { name: 'jegin' })
     this.qb = new QueryBuilder({
       any: { type: 'JSON', resolver: (input) => sanitizeObject(input) },
       boolean: { type: 'BIT(1)', resolver: (input) => input ? '1' : '0' },
@@ -29,9 +29,24 @@ module.exports = class extends SQLProvider {
       timestamp: { type: 'TIMESTAMP', resolver: (input) => TIMEPARSERS.DATE.display(input) },
       array: () => 'ARRAY',
       arrayResolver: (values) => values.length ? sanitizeObject(values) : "'[]'",
-      formatDatatype: (name, datatype, def = null) => datatype === 'ARRAY'
-        ? `${sanitizeKeyName(name)} TEXT`
-        : `${sanitizeKeyName(name)} ${datatype}${def !== null ? ` NOT NULL DEFAULT ${def}` : ''}`
+      formatDatatype: (name, datatype, def = null) => {
+        if (datatype === 'ARRAY') {
+          return `${sanitizeKeyName(name)} TEXT`
+        } else {
+          let answer = `${sanitizeKeyName(name)}`
+          if (sanitizeKeyName(name) === '`prefix`') {
+            answer += ' VARCHAR(10)'
+          } else {
+            answer += `  ${datatype}`
+          }
+          if (def !== null) {
+            answer += ` NOT NULL DEFAULT ${def}`
+          } else {
+            answer += ''
+          }
+          return answer
+        }
+      }
     })
     this.db = null
   }
@@ -42,7 +57,7 @@ module.exports = class extends SQLProvider {
       port: 3306,
       user: 'root',
       password: '',
-      database: 'simbad'
+      database: 'jegin'
     }, this.client.options.providers.mysql)
     this.db = await mysql.createConnection({
       host: connection.host,
@@ -73,10 +88,10 @@ module.exports = class extends SQLProvider {
 
     const schemaValues = [...gateway.schema.values(true)]
     return this.run(`
-      CREATE TABLE ${sanitizeKeyName(table)} (
-      id VARCHAR(${gateway.idLength || 18}) NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''},
-      PRIMARY KEY(id)
-      )`
+			CREATE TABLE ${sanitizeKeyName(table)} (
+				id VARCHAR(${gateway.idLength || 18}) NOT NULL UNIQUE${schemaValues.length ? `, ${schemaValues.map(this.qb.parse.bind(this.qb)).join(', ')}` : ''},
+				PRIMARY KEY(id)
+			)`
     )
   }
 
@@ -136,7 +151,6 @@ module.exports = class extends SQLProvider {
 
   create (table, id, data) {
     const [keys, values] = this.parseUpdateInput(data, false)
-
     // Push the id to the inserts.
     if (!keys.includes('id')) {
       keys.push('id')
@@ -196,11 +210,11 @@ module.exports = class extends SQLProvider {
 
   getColumns (table) {
     return this.runAll(`
-      SELECT \`COLUMN_NAME\`
-      FROM \`INFORMATION_SCHEMA\`.\`COLUMNS\`
-      WHERE \`TABLE_SCHEMA\` = ${sanitizeString(this.client.options.providers.mysql.database)}
-        AND \`TABLE_NAME\` = ${sanitizeString(table)};
-      `).then(result => result.map(row => row.COLUMN_NAME))
+			SELECT \`COLUMN_NAME\`
+			FROM \`INFORMATION_SCHEMA\`.\`COLUMNS\`
+			WHERE \`TABLE_SCHEMA\` = ${sanitizeString(this.client.options.providers.mysql.database)}
+				AND \`TABLE_NAME\` = ${sanitizeString(table)};
+		`).then(result => result.map(row => row.COLUMN_NAME))
   }
 
   run (sql) {
@@ -256,7 +270,7 @@ function parseRange (min, max) {
  */
 function sanitizeInteger (value) {
   if (!isNumber(value)) throw new TypeError(`%MySQL.sanitizeNumber expects an integer, got ${value}`)
-  if (value < 0) throw new TypeError(`%MySQL.sanitizeNumber expects a positive integer, got ${value}`)
+  // if (value < 0) throw new TypeError(`%MySQL.sanitizeNumber expects a positive integer, got ${value}`)
   return String(value)
 }
 

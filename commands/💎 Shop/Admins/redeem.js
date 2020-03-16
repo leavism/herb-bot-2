@@ -12,7 +12,7 @@ module.exports = class extends Command {
       usageDelim: ' ',
       extendedHelp: 'Separate the user mention from the item name with a space. Any subsequent spaces after that first space is included in the item name. Notice that the Item_Name argument is only optional.'
     })
-    this.db = this.client.providers.get('mysql')
+    this.db = this.client.providers.get('simbad')
   }
 
   async run (message, [member, itemName]) {

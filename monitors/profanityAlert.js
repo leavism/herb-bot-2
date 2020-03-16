@@ -13,7 +13,7 @@ module.exports = class extends Monitor {
   }
 
   async init () {
-    this.db = this.client.providers.get('mysql')
+    this.db = this.client.providers.get('simbad')
   }
 
   async run (message) {
@@ -52,7 +52,7 @@ module.exports = class extends Monitor {
 
   buildModAlertEmbed (message, checker) {
     const alertEmbed = new MessageEmbed()
-      .setTitle('Profanity Alert')
+      .setTitle('Possible Profanity Alert')
       .setDescription(message.createdAt)
       .setColor([255, 73, 74])
       .addField(
@@ -71,7 +71,7 @@ module.exports = class extends Monitor {
         true
       )
       .addField(
-        'Profanity',
+        'Word',
         checker.word,
         true
       )
