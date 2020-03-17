@@ -32,14 +32,14 @@ module.exports = class extends Command {
       if (faction.controlling === 1) {
         trendEmbed.setDescription(`Controlling faction is ${faction.faction}`)
       }
-      let string = `__Influence__: ${faction.influence}%`
-      string = (faction.state === 'NONE') ? string : string += `\n__State__: ${faction.state}`
-      string = (faction.pending[0].state === 'NONE') ? string : string += `\n__Pending__: ${faction.pending[0].state}`
-      string = (faction.recover[0].state === 'NONE') ? string : string += `\n__Recovering__: ${faction.recover[0].state}`
-      string += `\n__Mood__: ${faction.happiness}`
+      let string = `Influence: **${faction.influence}%**`
+      string = (faction.state === 'NONE') ? string : string += `\nState: **${faction.state}**`
+      string = (faction.pending[0].state === 'NONE') ? string : string += `\nPending: **${faction.pending[0].state}**`
+      string = (faction.recover[0].state === 'NONE') ? string : string += `\nRecovering: **${faction.recover[0].state}**`
+      string += `\nMood: **${faction.happiness}**`
 
       trendEmbed.addField(
-        faction.faction,
+        `**${faction.faction}**`,
         string,
         true
       )
