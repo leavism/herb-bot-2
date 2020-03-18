@@ -3,7 +3,7 @@ const config = require('./config.js');
 
 (() => {
   const client = new Client({
-    prefix: '-',
+    prefix: config.prefix,
     readyMessage: (client) => `Successfully initialized. Here is an invite link: ${client.invite}`
   })
 
