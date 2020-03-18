@@ -16,6 +16,7 @@ module.exports = class extends Command {
 
   async run (message, [systemName, days]) {
     const system = await this.db.get('system', 'name', systemName)
+    if (system === null) return message.send(`I couldn\'t find the '${systemName}' system.`)
     const graph = new MessageEmbed()
       .setTitle(system.name)
       .setImage(`http://jegin.net/testchart2.php?sysid=${system.id}&sphere=${'SIMBAD REGIME'.replace(/ /g, '+')}&ts=${days}&rid=${Date.now()}`)

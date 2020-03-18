@@ -17,6 +17,7 @@ module.exports = class extends Command {
 
   async run (message, [systemName, days]) {
     const system = await this.db.get('system', 'name', systemName)
+    if (system === null) return message.send(`I couldn\'t find the '${systemName}' system.`)
     message.send(await this.buildTrendEmbed(system, days))
   }
 
