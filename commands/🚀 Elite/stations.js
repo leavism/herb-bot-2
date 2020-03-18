@@ -17,7 +17,7 @@ module.exports = class extends Command {
 
   async run (message, [systemName, days]) {
     const system = await this.db.get('system', 'name', systemName)
-    if (system === null) return message.send(`I couldn\'t find the '${systemName}' system.`)
+    if (system === null) return message.send(`I couldn't find the '${systemName}' system.`)
     const stationData = await this.getStationData(system)
     const stationRichDisplay = await this.buildStationRichDisplay(stationData)
 
