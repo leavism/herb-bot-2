@@ -13,14 +13,17 @@ module.exports = class extends Command {
       usageDelim: ',',
       extendedHelp: 'Don\'t forget the comma between the two system names.'
     })
+  }
+
+  async init () {
     this.db = this.client.providers.get('jegin')
   }
 
-  async run (message, [systemA, systemB]) {
-    systemA = await this.getCoords(systemA) || await this.getEDSMCoords(systemA)
-    systemB = await this.getCoords(systemB) || await this.getEDSMCoords(systemB)
-    if (systemA === null) return message.send(`I couldn't find coordinates for the '${systemA}' system.`)
-    if (systemB === null) return message.send(`I couldn't find coordinates for the '${systemA}' system.`)
+  async run (message, [systemAName, systemBName]) {
+    const systemA = await this.getCoords(systemAName) || await this.getEDSMCoords(systemAName)
+    const systemB = await this.getCoords(systemBName) || await this.getEDSMCoords(systemBName)
+    if (!systemA) return message.send(`I couldn't find coordinates for the '${systemAName}' system.`)
+    if (!systemB) return message.send(`I couldn't find coordinates for the '${systemAName}' system.`)
 
     const x = systemA.x - systemB.x
     const y = systemA.y - systemB.y
@@ -42,7 +45,7 @@ module.exports = class extends Command {
 
     if (Array.isArray(response)) return null
 
-    return {
+    return { // Made it return this way to match the object properties of getting coords through SQL. That way the run code doesn't change
       name: response.name,
       x: response.coords.x,
       y: response.coords.y,
