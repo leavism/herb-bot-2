@@ -13,9 +13,9 @@ module.exports = class extends Command {
     })
   }
 
+  // For future reference, if you're wondering why the bot can edit the role of someone higher in role hierarchy than the bot, it's it'll only work if the role doesn't have a managerial permission. If the role has a managerial permission, it cannot give it to someone that has a higher permission than the bot
   async run (message, [targetRole]) {
     if (!targetRole) return message.send(`You didn't specify a role. Do **not** mention the role. Use \`${this.client.options.prefix}roles [role]\` to add or remove a role.\nHere's a list of roles you can join: ${this.buildRoleList()}`)
-    if (!message.member.manageable) return message.send('You have a higher permissions than me!')
 
     const roleExist = message.guild.roles.find(role => role.name.toLowerCase() === targetRole.toLowerCase())
     if (!roleExist) return message.send(`'${targetRole}' isn't a role on this server.`)
@@ -26,10 +26,10 @@ module.exports = class extends Command {
     const alreadyHave = message.member.roles.find(role => role === roleExist)
     if (alreadyHave) {
       message.member.roles.remove(roleExist, `${message.member} used the leave command.`)
-      return message.send(`I've removed the ${roleExist.name} role.`)
+      return message.send(`I've removed you the ${roleExist.name} role.`)
     } else {
       message.member.roles.add(roleExist, `${message.member} used the join command.`)
-      return message.send(`You now have the ${roleExist.name} role!`)
+      return message.send(`I've given you the ${roleExist.name} role.`)
     }
   }
 
