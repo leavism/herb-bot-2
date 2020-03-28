@@ -17,7 +17,6 @@ module.exports = class extends Event {
 
   async run (member) {
     if (await this.checkUser(member) === false) await this.makeUser(member)
-    console.log(this.localISOTime(member.joinedAt))
     const user = await this.getUser(member)
     await this.updateJoinTable({ user, member })
     const joinLogChannelName = await this.db.get('config', 'key', 'join_log_channel')
@@ -29,7 +28,6 @@ module.exports = class extends Event {
     // If no user mention, then info pulled about author
     const createdDaysAgo = `(${Math.round((new Date() - memberObj.user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
     const joinedDaysAgo = `(${Math.round((new Date() - memberObj.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const sortedMembers = memberObj.guild.members.sort(this.compareJoinedAt).map(m => m.user)
 
     const userInfoEmbed = new MessageEmbed()
       .setAuthor(`${memberObj.user.tag} ${(memberObj.nickname) ? `(${memberObj.nickname})` : ''}`, memberObj.user.displayAvatarURL())
@@ -47,11 +45,11 @@ module.exports = class extends Event {
         true
       )
       .addField(
-        'Previous Join Dates (starting March 20, 2020)',
+        'Previous Join Dates',
         await this.stringifyJoinDates(await this.getUser(memberObj)),
         false
       )
-      .setFooter(`Member #${sortedMembers.indexOf(memberObj.user) + 1} | User ID: ${memberObj.id}`)
+      .setFooter(`User ID: ${memberObj.id}`)
     return userInfoEmbed
   }
 
