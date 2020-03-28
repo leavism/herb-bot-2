@@ -10,20 +10,21 @@ module.exports = class extends Command {
       aliases: ['rt', 'roletoggle'],
       permissionLevel: 7,
       description: 'Toggle whether people can use the role command on a role.',
-      usage: '[Role:role]',
-      extendedHelp: ''
-    })
+      usage: '[Role:...string]',
+      extendedHelp: 'You do not need to mention the role. For example: to toggle the Simbian role, do `?rt simbian`.'    })
   }
 
-  async run (message, [role]) {
-    if (!role) return message.send(`Here is a list of roles people can join: ${this.buildRoleList()} Use \`${this.client.options.prefix}rtoggle @rolemention\` if you want to toggle a role.`)
-    if (jRoles.joinable.includes(role.name)) {
-      jRoles.joinable.splice(jRoles.joinable.indexOf(role.name), 1)
-      return message.send(`${role.name} is no longer jonable. Here's a list of roles people can join: ${this.buildRoleList()}`)
+  async run (message, [targetRole]) {
+    if (!targetRole) return message.send(`Here is a list of roles people can join: ${this.buildRoleList()} Use \`${this.client.options.prefix}rtoggle <role_name>\` if you want to toggle a role.`)
+    const roleExist = message.guild.roles.find(role => role.name.toLowerCase() === targetRole.toLowerCase())
+    if (!roleExist) return message.send(`'${targetRole}' isn't a role on this server.`)
+    if (jRoles.joinable.includes(roleExist.name)) {
+      jRoles.joinable.splice(jRoles.joinable.indexOf(roleExist.name), 1)
+      return message.send(`'${roleExist.name}' is no longer jonable. Here's a list of roles people can join: ${this.buildRoleList()}`)
     } else {
-      jRoles.joinable.push(role.name)
+      jRoles.joinable.push(roleExist.name)
       await this.saveJoinables()
-      return message.send(`${role.name} is now joinable. Here's a list of roles people can join: ${this.buildRoleList()}`)
+      return message.send(`'${roleExist.name}' is now joinable. Here's a list of roles people can join: ${this.buildRoleList()}`)
     }
   }
 
@@ -32,6 +33,6 @@ module.exports = class extends Command {
   }
 
   buildRoleList () {
-    return `\`\`\`${jRoles.joinable.join('\n@')}\`\`\``
+    return `\`\`\`${jRoles.joinable.join('\n')}\`\`\``
   }
 }
