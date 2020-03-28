@@ -26,7 +26,7 @@ module.exports = class extends Command {
     const alreadyHave = message.member.roles.find(role => role === roleExist)
     if (alreadyHave) {
       message.member.roles.remove(roleExist, `${message.member} used the leave command.`)
-      return message.send(`I've removed you the ${roleExist.name} role.`)
+      return message.send(`I've removed the ${roleExist.name} role.`)
     } else {
       message.member.roles.add(roleExist, `${message.member} used the join command.`)
       return message.send(`I've given you the ${roleExist.name} role.`)
