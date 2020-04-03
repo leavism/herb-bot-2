@@ -35,7 +35,7 @@ CREATE TABLE `banned_words` (
 
 LOCK TABLES `banned_words` WRITE;
 /*!40000 ALTER TABLE `banned_words` DISABLE KEYS */;
-INSERT INTO `banned_words` VALUES (1,'nigga'),(2,'nibba'),(3,'nigger'),(4,'gay'),(5,'gaylord'),(6,'fag'),(7,'faggot'),(8,'gays'),(9,'niggas'),(10,'faggots'),(11,'fags'),(12,'ni? ?a'),(13,'ni??a'),(14,'ni? ?a'),(15,'autism'),(16,'autistic'),(17,'trump'),(18,'donald trump');
+INSERT INTO `banned_words` VALUES (1,'nigga'),(2,'nibba'),(3,'nigger'),(4,'gay'),(5,'gaylord'),(6,'fag'),(7,'faggot'),(8,'gays'),(9,'niggas'),(10,'faggots'),(11,'fags'),(12,'ni🅱 🅱a'),(13,'ni🅱🅱a'),(14,'ni🅶🅶a'),(15,'autism'),(16,'autistic'),(17,'trump'),(18,'donald trump');
 /*!40000 ALTER TABLE `banned_words` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
