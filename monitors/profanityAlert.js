@@ -7,9 +7,12 @@ module.exports = class extends Monitor {
     super(...args, {
       name: 'profanityAlert',
       enabled: true,
+      ignoreSelf: true,
+      ignoreBots: true,
       ignoreOthers: false,
       ignoreEdits: false
     })
+    this.managerial = ["ADMINISTRATOR", "KICK_MEMBERS", "BAN_MEMBERS", "MANAGE_CHANNELS", "MANAGE_GUILD", "MANAGE_ROLES", "MANAGE_WEBHOOKS"];
   }
 
   async init () {
@@ -19,6 +22,7 @@ module.exports = class extends Monitor {
   async run (message) {
     if (!message.guild) return
     if (!message.content || !message.content.length) return
+    if (message.member.permissions.toArray().some(permission => this.managerial.includes(permission))) return
 
     var modChannel = await this.db.get('config', 'key', 'mod_channel')
     const cleanContent = this.sanitize(message.content)
@@ -39,12 +43,17 @@ module.exports = class extends Monitor {
   }
 
   filter (filteredWords, content) {
-    const found = filteredWords.find(word => content.includes(this.sanitize(word)))
+    const found = filteredWords.find((word) => { 
+      let regex = new RegExp(`${this.sanitize(word)}\\b`, 'gi')
+      if (content.match(regex)) return word
+    })
+    let regex = new RegExp(`${found}\\b`, 'gi')
     if (found) {
       return {
         state: true,
         word: found,
-        index: content.indexOf(found)
+        regex: regex,
+        index: content.search(regex)
       }
     }
     return { state: false }
@@ -57,7 +66,7 @@ module.exports = class extends Monitor {
       .setColor([255, 73, 74])
       .addField(
         'Message',
-        (message.content.length <= 200) ? `${message.content}`.replace(checker.word, `__**${checker.word}**__`) : this.cutString(message.content, checker.index).replace(checker.word, `__**${checker.word}**__`),
+        (message.content.length <= 200) ? `${message.content}`.replace(checker.regex, `__**${checker.word}**__`) : this.cutString(message.content, checker.index).replace(checker.word, `__**${checker.word}**__`),
         false
       )
       .addField(
