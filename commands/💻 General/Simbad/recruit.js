@@ -9,7 +9,7 @@ module.exports = class extends Command {
       description: 'Give someone the Recruit role!',
       usage: '<Mention:member>',
       permissionLevel: 5,
-      extendedHelp: 'Don\'t forget to mention the use.'
+      extendedHelp: 'Don\'t forget to mention the user.'
     })
     this.db = this.client.providers.get('simbad')
   }
@@ -18,6 +18,10 @@ module.exports = class extends Command {
     const recruit = message.guild.roles.find(role => role.name === 'Recruit')
     const elite = message.guild.roles.find(role => role.name === 'Elite')
     const simbian = message.guild.roles.find(role => role.name === 'Simbian')
+    if (!recruit) return message.send('The Guest role doesn\'t exist.')
+    if (!elite) return message.send('The Guest role doesn\'t exist.')
+    if (!simbian) return message.send('The Guest role doesn\'t exist.')
+
     const recruitRoles = [recruit, elite, simbian]
     const currentRoles = member.roles.map(role => role)
     const alreadySimbian = currentRoles.filter(cRole => recruitRoles.includes(cRole))
