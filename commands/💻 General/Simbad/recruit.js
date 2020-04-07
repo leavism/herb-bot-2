@@ -8,6 +8,7 @@ module.exports = class extends Command {
       runIn: ['text'],
       description: 'Give someone the Recruit role!',
       usage: '<Mention:member>',
+      permissionLevel: 2,
       extendedHelp: 'Don\'t forget to mention the use.'
     })
     this.db = this.client.providers.get('simbad')
@@ -30,7 +31,6 @@ module.exports = class extends Command {
         let generalChannel = await this.db.get('config', 'key', 'general_channel')
         generalChannel = message.guild.channels.find(channel => channel.name === generalChannel.value)
         generalChannel.send(`You're now a member of Simbad, ${member}! This grants access to our text and voice channels, so feel free to get to know everyone. You've also been given the Recruit role, which indiciates you're a newer member. Once you've grown into our community, you can lose the Recruit role and celebrate with dank memes. Our group's home system is Farowalan - Bamford City, come on down! Everyone, say hello!`)
-      }
-      )
+      })
   }
 }
