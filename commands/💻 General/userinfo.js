@@ -29,7 +29,7 @@ module.exports = class extends Command {
     // If no user mention, then info pulled about author
     const createdDaysAgo = `(${Math.round((new Date() - memberObj.user.createdAt) / (24 * 60 * 60 * 1000))} days ago)`
     const joinedDaysAgo = `(${Math.round((new Date() - memberObj.joinedAt) / (24 * 60 * 60 * 1000))} days ago)`
-    const roles = (memberObj.roles.size === 1) ? 'No roles :(' : memberObj.roles.map(m => m).filter(m => m.name !== '@everyone').join(' ')
+    const roles = (memberObj.roles.size === 1) ? 'No roles :(' : memberObj.roles.array().filter(m => m.name !== '@everyone').join(' ')
     const sortedMembers = memberObj.guild.members.sort(this.compareJoinedAt).map(m => m.user)
 
     const userInfoEmbed = new MessageEmbed()
