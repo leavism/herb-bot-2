@@ -8,7 +8,7 @@ module.exports = class extends Command {
       runIn: ['text'],
       description: 'Give someone the Recruit role!',
       usage: '<Mention:member>',
-      permissionLevel: 2,
+      permissionLevel: 5,
       extendedHelp: 'Don\'t forget to mention the use.'
     })
     this.db = this.client.providers.get('simbad')
