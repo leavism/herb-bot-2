@@ -8,10 +8,56 @@ module.exports = class extends Command {
     super(...args, {
       subcommands: true,
       description: 'Take a look at the Simbit Shop!',
-      usage: '<transfer|bank|list|buy|help:default> [item:...string]',
+      usage: '<transferx|atransferx|bank|list|buy|help:default> [item:...string]',
       usageDelim: ' '
     })
     this.db = this.client.providers.get('simbad')
+  }
+
+  async transferx (message, params) {
+    const users = shop.users.map((user) => ({ name: user.name, id: user.id, inventory: user.inventory, balance: user.balance }))
+    this.asyncForEach(users, async (user) => {
+      var userExist = await this.db.get('user', 'discord_id', user.id)
+      var discordID = user.id
+      var balance = user.balance
+      if (userExist == null) {
+        await this.db.run(`INSERT INTO user (discord_id, balance) VALUES (${discordID}, ${balance});`)
+      }
+      this.asyncForEach(user.inventory, async (item) => {
+        if (item.Item.length > 50) {
+        }
+        var exist = await this.db.get('item', 'name', item.Item.toLowerCase())
+        if (exist == null) {
+          await this.db.run(`INSERT INTO item (name, description) VALUES ('${item.Item.toLowerCase().replace('\'', '\'\'')}', 'None.');`)
+        }
+        for (let index = 0; index < item.quantity; index++) {
+          var uID = await this.db.get('user', 'discord_id', `${user.id}`)
+          var iID = await this.db.get('item', 'name', `${item.Item.toLowerCase()}`)
+          await this.db.run(`INSERT INTO transaction (item_id, user_id) VALUES (${iID.id}, ${uID.id});`)
+            .catch((e) => console.log(e))
+        }
+      })
+    })
+  }
+
+  async atransferx (message, params) {
+    const users = shop.users.map((user) => ({ name: user.name, id: user.id, inventory: user.inventory, balance: user.balance }))
+    this.asyncForEach(users, async (user) => {
+      this.asyncForEach(user.inventory, async (item) => {
+        if (item.Item.length > 50) {
+        }
+        var exist = await this.db.get('item', 'name', item.Item.toLowerCase())
+        if (exist == null) {
+          await this.db.run(`INSERT INTO item (name, description) VALUES ('${item.Item.toLowerCase().replace('\'', '\'\'')}', 'None.');`)
+        }
+        for (let index = 0; index < item.quantity; index++) {
+          var uID = await this.db.get('user', 'discord_id', `${user.id}`)
+          var iID = await this.db.get('item', 'name', `${item.Item.toLowerCase()}`)
+          await this.db.run(`DELETE FROM transaction WHERE item_id = ${iID.id} AND user_id = ${uID.id} LIMIT 1;`)
+            .catch((e) => console.log(e))
+        }
+      })
+    })
   }
 
   async bank (message, params) {
