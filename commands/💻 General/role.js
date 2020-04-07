@@ -20,10 +20,10 @@ module.exports = class extends Command {
     const role = message.guild.roles.find(role => role.name.toLowerCase() === targetRole.toLowerCase())
     if (!role) return message.send(`'${targetRole}' isn't a role on this server.`)
 
-    const joinableRole = jRoles.joinable.find(role => role.toLowerCase() === role.name.toLowerCase())
-    if (!joinableRole) return message.send(`You aren't allowed manage the '${targetRole}' role.`)
+    const joinableRole = jRoles.joinable.find(joinableRole => joinableRole.toLowerCase() === role.name.toLowerCase())
+    if (!joinableRole) return message.send(`You aren't allowed toggle the '${targetRole}' role.`)
 
-    const alreadyHave = message.member.roles.find(role => role === role)
+    const alreadyHave = message.member.roles.find(currentRole => currentRole === role)
     if (alreadyHave) {
       message.member.roles.remove(role, `${message.member} used the leave command.`)
       return message.send(`I've removed the ${role.name} role.`)
@@ -33,6 +33,9 @@ module.exports = class extends Command {
     }
   }
 
+  /** 
+   * Builds the role list string
+   */
   buildRoleList () {
     return `\`\`\`${jRoles.joinable.join('\n')}\`\`\``
   }
