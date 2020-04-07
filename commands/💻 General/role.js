@@ -17,19 +17,19 @@ module.exports = class extends Command {
   async run (message, [targetRole]) {
     if (!targetRole) return message.send(`You didn't specify a role. Do **not** mention the role. Use \`${this.client.options.prefix}roles [role]\` to add or remove a role.\nHere's a list of roles you can join: ${this.buildRoleList()}`)
 
-    const roleExist = message.guild.roles.find(role => role.name.toLowerCase() === targetRole.toLowerCase())
-    if (!roleExist) return message.send(`'${targetRole}' isn't a role on this server.`)
+    const role = message.guild.roles.find(role => role.name.toLowerCase() === targetRole.toLowerCase())
+    if (!role) return message.send(`'${targetRole}' isn't a role on this server.`)
 
-    const joinableRole = jRoles.joinable.find(role => role.toLowerCase() === roleExist.name.toLowerCase())
+    const joinableRole = jRoles.joinable.find(role => role.toLowerCase() === role.name.toLowerCase())
     if (!joinableRole) return message.send(`You aren't allowed manage the '${targetRole}' role.`)
 
-    const alreadyHave = message.member.roles.find(role => role === roleExist)
+    const alreadyHave = message.member.roles.find(role => role === role)
     if (alreadyHave) {
-      message.member.roles.remove(roleExist, `${message.member} used the leave command.`)
-      return message.send(`I've removed the ${roleExist.name} role.`)
+      message.member.roles.remove(role, `${message.member} used the leave command.`)
+      return message.send(`I've removed the ${role.name} role.`)
     } else {
-      message.member.roles.add(roleExist, `${message.member} used the join command.`)
-      return message.send(`I've given you the ${roleExist.name} role.`)
+      message.member.roles.add(role, `${message.member} used the join command.`)
+      return message.send(`I've given you the ${role.name} role.`)
     }
   }
 
