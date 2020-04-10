@@ -12,11 +12,14 @@ module.exports = class extends Command {
       description: 'Get information on the stations of a system.',
       extendedHelp: 'Provide the name of the system.'
     })
-    this.db = this.client.providers.get('jegin')
+  }
+
+  async init () {
+    this.jegin = this.client.providers.get('jegin')
   }
 
   async run (message, [systemName, days]) {
-    const system = await this.db.get('system', 'name', systemName)
+    const system = await this.jegin.get('system', 'name', systemName)
     if (system === null) return message.send(`I couldn't find the '${systemName}' system.`)
     const stationData = await this.getStationData(system)
     const stationRichDisplay = await this.buildStationRichDisplay(stationData)

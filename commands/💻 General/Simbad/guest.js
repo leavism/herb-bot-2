@@ -10,7 +10,10 @@ module.exports = class extends Command {
       permissionLevel: 5,
       extendedHelp: 'Don\'t forget to mention the user.'
     })
-    this.db = this.client.providers.get('simbad')
+  }
+
+  async init () {
+    this.simbad = this.client.providers.get('simbad')
   }
 
   async run (message, [member]) {

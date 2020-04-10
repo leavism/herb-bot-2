@@ -16,7 +16,7 @@ module.exports = class extends Command {
   }
 
   async init () {
-    this.db = this.client.providers.get('jegin')
+    this.jegin = this.client.providers.get('jegin')
   }
 
   async run (message, [systemAName, systemBName]) {
@@ -54,6 +54,6 @@ module.exports = class extends Command {
   }
 
   async getCoords (system) {
-    return this.db.get('system', 'name', system)
+    return this.jegin.get('system', 'name', system)
   }
 }

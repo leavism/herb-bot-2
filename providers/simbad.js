@@ -149,7 +149,6 @@ module.exports = class extends SQLProvider {
     const [keys, values] = this.parseUpdateInput(data, false)
     const update = new Array(keys.length)
     for (let i = 0; i < keys.length; i++) update[i] = `${sanitizeKeyName(keys[i])} = ${sanitizeInput(values[i])}`
-
     return this.exec(`UPDATE ${sanitizeKeyName(table)} SET ${update.join(', ')} WHERE id = ${sanitizeString(id)};`)
   }
 
@@ -215,6 +214,98 @@ module.exports = class extends SQLProvider {
 
   exec (sql) {
     return this.db.query(sql)
+  }
+
+  /**
+   * Checks if guild member is in the user table
+   * @param {guildMember} memberObj - The target guild member
+   * @returns {boolean} - Whether guild member is in user table (true) or not in the table (false)
+   */
+  async checkUser (memberObj) {
+    const result = await this.get('user', 'discord_id', memberObj.id)
+    if (result == null) {
+      return false
+    }
+    return true
+  }
+
+  /**
+   * Add a record to the user table
+   * @param {guildMember} memberObj - The target guild member
+   */
+  async makeUser (memberObj) {
+    const startingBalance = 0
+    const id = await this.countRows('user')
+    await this.create('user', id + 1, [['discord_id', memberObj.id], ['balance', startingBalance]])
+  }
+
+  /**
+   * Gets a record from the user table based on discord_id
+   * @param {guildMember} memberObj - The target guild member
+   */
+  async getUser (memberObj) {
+    return this.get('user', 'discord_id', memberObj.id)
+  }
+
+  /**
+   * Gets a record from the item table
+   * @param {string} itemName
+   */
+  async getItem (itemName) {
+    return this.get('item', 'name', itemName)
+  }
+
+  /**
+   * Gets a record from the shop table
+   * @param {string} itemName - Name of the shop item
+   */
+  async getShopItem (itemName) {
+    return this.run(`SELECT * FROM item INNER JOIN shop ON item.id = shop.item_id WHERE item.name = '${itemName.toLowerCase()}'`)
+  }
+
+  /**
+   * Add Simbits to a shop user's balance
+   * @param {guildMember} memberObj - The target guild member
+   * @param {integer} amount - The amount to award
+   */
+  async awardUser (memberObj, amount) {
+    const user = await this.getUser(memberObj)
+    return this.update('user', user.id, [['balance', user.balance + amount]])
+  }
+
+  /**
+   * Deduct an amount of Simbits from a shop user
+   * @param {guildMember} memberObj - The target guild member
+   * @param {integer} amount - The amount to deduct from shop user
+   */
+  async deductUser (memberObj, amount) {
+    const user = await this.getUser(memberObj)
+    return this.update('user', user.id, [['balance', user.balance - amount]])
+  }
+
+  /**
+   * Removes a record from the transaction table
+   * @param {guildMember} memberObj - The target guild member
+   * @param {string} itemName - The name of the item
+   * @returns {boolean} - Whether removing the record from the table successful (true) or not (false)
+   */
+  async redeemItem (memberObj, itemName) {
+    const item = await this.getItem(itemName)
+
+    if (!item) {
+      return false
+    }
+
+    const targetTransaction = await this.run(
+      `SELECT transaction.id, transaction.item_id
+      FROM user INNER JOIN transaction
+      ON transaction.user_id = user.id
+      WHERE user.discord_id = ${memberObj.id}
+      AND transaction.item_id = ${item.id}`
+    )
+    if (!targetTransaction) return false
+    await this.run(`DELETE FROM transaction WHERE id = ${targetTransaction.id}`)
+    return true
   }
 }
 

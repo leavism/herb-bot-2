@@ -11,11 +11,14 @@ module.exports = class extends Command {
       description: '',
       extendedHelp: 'No extended help available.'
     })
-    this.db = this.client.providers.get('jegin')
+  }
+
+  async init () {
+    this.jegin = this.client.providers.get('jegin')
   }
 
   async run (message, [systemName, days]) {
-    const system = await this.db.get('system', 'name', systemName)
+    const system = await this.jegin.get('system', 'name', systemName)
     if (system === null) return message.send(`I couldn't find the '${systemName}' system.`)
     const graph = new MessageEmbed()
       .setTitle(system.name)

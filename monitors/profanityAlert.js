@@ -12,11 +12,11 @@ module.exports = class extends Monitor {
       ignoreOthers: false,
       ignoreEdits: false
     })
-    this.managerial = ["ADMINISTRATOR", "KICK_MEMBERS", "BAN_MEMBERS", "MANAGE_CHANNELS", "MANAGE_GUILD", "MANAGE_ROLES", "MANAGE_WEBHOOKS"];
+    this.managerial = ['ADMINISTRATOR', 'KICK_MEMBERS', 'BAN_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_GUILD', 'MANAGE_ROLES', 'MANAGE_WEBHOOKS']
   }
 
   async init () {
-    this.db = this.client.providers.get('simbad')
+    this.simbad = this.client.providers.get('simbad')
   }
 
   async run (message) {
@@ -24,9 +24,9 @@ module.exports = class extends Monitor {
     if (!message.content || !message.content.length) return
     if (message.member.permissions.toArray().some(permission => this.managerial.includes(permission))) return
 
-    var modChannel = await this.db.get('config', 'key', 'mod_channel')
+    var modChannel = await this.simbad.get('config', 'key', 'mod_channel')
     const cleanContent = this.sanitize(message.content)
-    const filteredWords = await this.db.getAll('banned_words')
+    const filteredWords = await this.simbad.getAll('banned_words')
       .then(table => table.map(word => word.word))
 
     if (!filteredWords || !filteredWords.length) return
@@ -43,11 +43,11 @@ module.exports = class extends Monitor {
   }
 
   filter (filteredWords, content) {
-    const found = filteredWords.find((word) => { 
-      let regex = new RegExp(`${this.sanitize(word)}\\b`, 'gi')
+    const found = filteredWords.find((word) => {
+      const regex = new RegExp(`${this.sanitize(word)}\\b`, 'gi')
       if (content.match(regex)) return word
     })
-    let regex = new RegExp(`${found}\\b`, 'gi')
+    const regex = new RegExp(`${found}\\b`, 'gi')
     if (found) {
       return {
         state: true,

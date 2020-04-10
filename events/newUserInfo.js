@@ -12,15 +12,15 @@ module.exports = class extends Event {
   }
 
   async init () {
-    this.db = this.client.providers.get('simbad')
+    this.simbad = this.client.providers.get('simbad')
   }
 
   async run (member) {
-    if (await this.checkUser(member) === false) await this.makeUser(member)
-    const user = await this.getUser(member)
+    if (!(await this.simbad.checkUser(member))) await this.simbad.makeUser(member)
+    const user = await this.simbad.getUser(member)
     await this.updateJoinTable({ user, member })
 
-    const joinLogChannelName = await this.db.get('config', 'key', 'join_log_channel')
+    const joinLogChannelName = await this.simbad.get('config', 'key', 'join_log_channel')
     const joinLogChannel = member.guild.channels.find(channel => channel.name === joinLogChannelName.value)
     return joinLogChannel.send(await this.buildTargetInfoEmbed(member))
   }
@@ -50,7 +50,7 @@ module.exports = class extends Event {
       )
       .addField(
         'Previous Join Dates',
-        await this.stringifyJoinDates(await this.getUser(memberObj)),
+        await this.stringifyJoinDates(await this.simbad.getUser(memberObj)),
         false
       )
       .setFooter(`User ID: ${memberObj.id}`)
@@ -58,20 +58,11 @@ module.exports = class extends Event {
   }
 
   /**
-   * Add guild member into the user table
-   * @param {guildMember} memberObj - The target guild member
-   */
-  async makeUser (memberObj) {
-    const startingBalance = 0
-    await this.db.run(`INSERT INTO user (discord_id, balance) VALUES (${memberObj.id}, ${startingBalance})`)
-  }
-
-  /**
    * Updates the databate join table
    * @param {objectLiteral} data - Contains the database user object and the Discord member object
    */
   async updateJoinTable (data) {
-    await this.db.run(`INSERT INTO simbad.join (user_id, date) VALUES (${data.user.id}, '${this.localISOTime(data.member.joinedAt)}')`)
+    await this.simbad.run(`INSERT INTO simbad.join (user_id, date) VALUES (${data.user.id}, '${this.localISOTime(data.member.joinedAt)}')`)
   }
 
   /**
@@ -79,7 +70,7 @@ module.exports = class extends Event {
    * @param {userObj} user - Database user object
    */
   async getJoinDates (user) {
-    return this.db.runAll(`SELECT * FROM simbad.join WHERE user_id = ${user.id}`)
+    return this.simbad.runAll(`SELECT * FROM simbad.join WHERE user_id = ${user.id}`)
   }
 
   /**
@@ -89,27 +80,6 @@ module.exports = class extends Event {
   async stringifyJoinDates (user) {
     const joinDates = await this.getJoinDates(user)
     return joinDates.map(obj => `${this.timestamp.display(obj.date)}`).join(', ')
-  }
-
-  /**
-   * Gets the shop user from the user table based on discord_id
-   * @param {guildMember} memberObj - The target guild member
-   */
-  async getUser (memberObj) {
-    return this.db.get('user', 'discord_id', memberObj.id)
-  }
-
-  /**
-   * Checks if guild member is in the user table
-   * @param {guildMember} memberObj - The target guild member
-   * @returns {boolean} - Whether guild member is in user table (true) or not in the table (false)
-   */
-  async checkUser (memberObj) {
-    const result = await this.db.get('user', 'discord_id', memberObj.id)
-    if (result == null) {
-      return false
-    }
-    return true
   }
 
   /**

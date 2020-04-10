@@ -12,89 +12,27 @@ module.exports = class extends Command {
       usageDelim: ' ',
       extendedHelp: 'Separate the user mention from the item name with a space. Any subsequent spaces after that first space is included in the item name. Notice that the Item_Name argument is only optional.'
     })
-    this.db = this.client.providers.get('simbad')
+  }
+
+  async init () {
+    this.simbad = this.client.providers.get('simbad')
   }
 
   async run (message, [member, itemName]) {
-    if (await this.checkUser(member) === false) await this.makeUser(member)
-
-    if (itemName === undefined) {
-      return message.send(await this.buildInventoryEmbed(member))
-    }
+    if (!(await this.simbad.checkUser(member))) await this.simbad.makeUser(member)
+    if (!itemName) { return message.send(await this.buildInventoryEmbed(member)) }
 
     itemName = itemName.toLowerCase()
-    if (!(await this.redeemItem(member, itemName))) {
+    const redeemed = await this.simbad.redeemItem(member, itemName)
+    if (!redeemed) {
       message.send(`'${this.toTitleCase(itemName)}' wasn't in their inventory. Here is their inventory:`)
       return message.send(await this.buildInventoryEmbed(member))
     } else {
       message.send(`'${this.toTitleCase(itemName)}' was redeemed from ${member.user.username}'s inventory.`)
-      let shopLogChannel = await this.db.get('config', 'key', 'shop_channel')
+      let shopLogChannel = await this.simbad.get('config', 'key', 'shop_channel')
       shopLogChannel = message.guild.channels.find(channel => channel.name === shopLogChannel.value)
       shopLogChannel.send(await this.buildShopLogEmbed({ message, member, itemName }))
     }
-  }
-
-  /**
-   * Add guild member into the user table
-   * @param {guildMember} memberObj - The target guild member
-   */
-  async makeUser (memberObj) {
-    const startingBalance = 0
-    await this.db.run(`INSERT INTO user (discord_id, balance) VALUES (${memberObj.id}, ${startingBalance})`)
-  }
-
-  /**
-   * Checks if guild member is in the user table
-   * @param {guildMember} memberObj - The target guild member
-   * @returns {boolean} - Whether guild member is in user table (true) or not in the table (false)
-   */
-  async checkUser (memberObj) {
-    const result = await this.db.get('user', 'discord_id', memberObj.id)
-    if (result == null) {
-      return false
-    }
-    return true
-  }
-
-  /**
-   * Gets the shop user from the user table based on discord_id
-   * @param {guildMember} memberObj - The target guild member
-   */
-  async getUser (memberObj) {
-    return this.db.get('user', 'discord_id', memberObj.id)
-  }
-
-  /**
-   * Gets a record from the item table
-   * @param {string} itemName
-   */
-  async getItem (itemName) {
-    return this.db.get('item', 'name', itemName)
-  }
-
-  /**
-   * Removes a record from the transaction table
-   * @param {guildMember} memberObj - The target guild member
-   * @param {string} itemName - The name of the item
-   * @returns {boolean} - Whether removing the record from the table successful (true) or not (false)
-   */
-  async redeemItem (memberObj, itemName) {
-    const item = await this.getItem(itemName)
-
-    if (item === null) {
-      return false
-    }
-
-    const targetTransaction = await this.db.run(
-      `SELECT transaction.id, transaction.item_id
-      FROM user INNER JOIN transaction
-      ON transaction.user_id = user.id
-      WHERE user.discord_id = ${memberObj.id}
-      AND transaction.item_id = ${item.id}`
-    )
-    if (targetTransaction === undefined) return false
-    await this.db.run(`DELETE FROM transaction WHERE id = ${targetTransaction.id}`)
-    return true
   }
 
   /**
@@ -104,7 +42,7 @@ module.exports = class extends Command {
    */
   async buildInventoryEmbed (memberObj) {
     const prefix = this.client.options.prefix
-    const inventory = await this.db.runAll(`SELECT DISTINCT transaction.item_id, item.name, COUNT(*) as count 
+    const inventory = await this.simbad.runAll(`SELECT DISTINCT transaction.item_id, item.name, COUNT(*) as count 
     FROM user INNER JOIN transaction
     ON transaction.user_id = user.id
     INNER JOIN item
@@ -132,11 +70,11 @@ module.exports = class extends Command {
   }
 
   async stringifyInventory (shopUser) {
-    const length = await this.db.run(`SELECT COUNT(*) FROM transaction WHERE user_id = ${shopUser.id}`)
+    const length = await this.simbad.run(`SELECT COUNT(*) FROM transaction WHERE user_id = ${shopUser.id}`)
     if (length['COUNT(*)'] === 0) {
       return 'None.'
     }
-    const inventory = await this.db.runAll(`SELECT item.name, COUNT(transaction.item_id) AS count FROM transaction INNER JOIN user ON transaction.user_id = user.id INNER JOIN item ON transaction.item_id = item.id WHERE user.discord_id = '${shopUser.discord_id}' GROUP BY transaction.item_id`)
+    const inventory = await this.simbad.runAll(`SELECT item.name, COUNT(transaction.item_id) AS count FROM transaction INNER JOIN user ON transaction.user_id = user.id INNER JOIN item ON transaction.item_id = item.id WHERE user.discord_id = '${shopUser.discord_id}' GROUP BY transaction.item_id`)
     return inventory.map(item => `${this.toTitleCase(item.name)} (${item.count}x)`)
   }
 
@@ -157,7 +95,7 @@ module.exports = class extends Command {
       )
       .addField(
         'New Inventory',
-        await this.stringifyInventory(await this.getUser(data.member)),
+        await this.stringifyInventory(await this.simbad.getUser(data.member)),
         true
       )
       .addField(
