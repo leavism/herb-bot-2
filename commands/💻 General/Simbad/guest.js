@@ -26,7 +26,7 @@ module.exports = class extends Command {
     member.roles.add(guest, `${message.member.user.tag} called the guest command on ${member.user.tag}`)
       .then(async () => {
         let generalChannel = await this.simbad.get('config', 'key', 'general_channel')
-        message.send(`Great work! Our new guest has been welcomed in ${generalChannel}!`)
+        message.send(`Great work! Our new guest has been welcomed in ${generalChannel.name}!`)
         generalChannel = message.guild.channels.find(channel => channel.name === generalChannel.value)
         generalChannel.send(`You're now a guest of Simbad, ${member}! This grants access to some of our text and voice channels, so feel free to hang out and get to know everyone. You can always request to become a full member at any time by contacting any of our leadership team! Everyone, say hello!`)
       })
