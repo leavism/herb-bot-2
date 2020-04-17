@@ -41,9 +41,16 @@ module.exports = class extends Command {
     system = system.replace('+', '%2B').replace(' ', '+')
     const url = `https://www.edsm.net/api-v1/system?sysname=${system}&coords=1`
     const response = await fetch(url)
-      .then(response => response.json())
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json()
+        } else {
+          return null
+        }
+      })
 
     if (Array.isArray(response)) return null
+    if (!response) return null
 
     return { // Made it return this way to match the object properties of getting coords through SQL. That way the run code doesn't change
       name: response.name,
