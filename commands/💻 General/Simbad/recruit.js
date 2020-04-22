@@ -28,7 +28,6 @@ module.exports = class extends Command {
     const alreadySimbian = currentRoles.filter(cRole => recruitRoles.includes(cRole))
 
     if (alreadySimbian.length !== 0) return message.send('They\'re already Simbian.')
-    if (!member.manageable) return message.send('They have a higher permission than me!')
 
     member.roles.add([elite, simbian], `${message.member.user.tag} called the recruit command on ${member.user.tag}`)
       .then(async () => {
