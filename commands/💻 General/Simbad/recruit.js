@@ -18,21 +18,19 @@ module.exports = class extends Command {
   }
 
   async run (message, [member]) {
-    const recruit = message.guild.roles.find(role => role.name === 'Recruit')
     const elite = message.guild.roles.find(role => role.name === 'Elite')
     const simbian = message.guild.roles.find(role => role.name === 'Simbian')
-    if (!recruit) return message.send('The Guest role doesn\'t exist.')
-    if (!elite) return message.send('The Guest role doesn\'t exist.')
-    if (!simbian) return message.send('The Guest role doesn\'t exist.')
+    if (!elite) return message.send('The elite role doesn\'t exist.')
+    if (!simbian) return message.send('The simbian role doesn\'t exist.')
 
-    const recruitRoles = [recruit, elite, simbian]
+    const recruitRoles = [elite, simbian]
     const currentRoles = member.roles.map(role => role)
     const alreadySimbian = currentRoles.filter(cRole => recruitRoles.includes(cRole))
 
     if (alreadySimbian.length !== 0) return message.send('They\'re already Simbian.')
     if (!member.manageable) return message.send('They have a higher permission than me!')
 
-    member.roles.add([recruit, elite, simbian], `${message.member.user.tag} called the recruit command on ${member.user.tag}`)
+    member.roles.add([elite, simbian], `${message.member.user.tag} called the recruit command on ${member.user.tag}`)
       .then(async () => {
         message.send(`${member.user.username} has been recruited!`)
         let generalChannel = await this.simbad.get('config', 'key', 'general_channel')
