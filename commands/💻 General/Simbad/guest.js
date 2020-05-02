@@ -27,7 +27,7 @@ module.exports = class extends Command {
       .then(async () => {
         let generalChannel = await this.simbad.get('config', 'key', 'general_channel')
         generalChannel = message.guild.channels.find(channel => channel.name === generalChannel.value)
-        message.send(`Great work! Our new guest has been welcomed in ${generalChannel.name}!`)
+        message.send(`Great work! Our new guest has been welcomed in ${generalChannel}!`)
         generalChannel.send(`You're now a guest of Simbad, ${member}! This grants access to some of our text and voice channels, so feel free to hang out and get to know everyone. You can always request to become a full member at any time by contacting any of our leadership team! Everyone, say hello!`)
       })
   }

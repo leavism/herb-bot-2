@@ -31,10 +31,12 @@ module.exports = class extends Command {
 
     member.roles.add([elite, simbian], `${message.member.user.tag} called the recruit command on ${member.user.tag}`)
       .then(async () => {
-        message.send(`${member.user.username} has been recruited!`)
         let generalChannel = await this.simbad.get('config', 'key', 'general_channel')
         generalChannel = message.guild.channels.find(channel => channel.name === generalChannel.value)
-        generalChannel.send(`You're now a member of Simbad, ${member}! This grants access to our text and voice channels, so feel free to get to know everyone. You've also been given the Recruit role, which indiciates you're a newer member. Once you've grown into our community, you can lose the Recruit role and celebrate with dank memes. Our group's home system is Farowalan - Bamford City, come on down! Everyone, say hello!`)
+        const botChannel = message.guild.channels.find(channel => channel.name === 'bot-chat')
+
+        message.send(`Great work! Our new Simbian has been welcomed in ${generalChannel}`)
+        generalChannel.send(`You're now a member of Simbad, ${member}! You can now access out text and voice channels, so feel free to look around. Our group's home system is Farowalan - Bamford City, come on down!\n\nSome things to do next:\n- Look at pinned posts in any channel you're interested in\n- Try the bot in ${botChannel} by typing \`?help\` or \`?shop\`\n- Say hello to everyone here!\n\n`)
       })
   }
 }
