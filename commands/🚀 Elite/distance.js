@@ -23,7 +23,7 @@ module.exports = class extends Command {
     const systemA = await this.getCoords(systemAName) || await this.getEDSMCoords(systemAName)
     const systemB = await this.getCoords(systemBName) || await this.getEDSMCoords(systemBName)
     if (!systemA) return message.send(`I couldn't find coordinates for the '${systemAName}' system.`)
-    if (!systemB) return message.send(`I couldn't find coordinates for the '${systemAName}' system.`)
+    if (!systemB) return message.send(`I couldn't find coordinates for the '${systemBName}' system.`)
 
     const x = systemA.x - systemB.x
     const y = systemA.y - systemB.y
