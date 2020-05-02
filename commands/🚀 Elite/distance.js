@@ -24,14 +24,9 @@ module.exports = class extends Command {
   async run (message, [systemAName, systemBName]) {
     const systemA = await this.getCoords(systemAName) || await this.getEDSMCoords(systemAName)
     const systemB = await this.getCoords(systemBName) || await this.getEDSMCoords(systemBName)
-    if (!systemA) {
-      const systemSuggestions = await this.makeSystemNameSuggestions(systemBName)
-      return message.send(`I couldn't find coordinates for the '${systemBName}' system. Did you mean: ${systemSuggestions.join(', ')}`)
-    }
-    if (!systemB) {
-      const systemSuggestions = await this.makeSystemNameSuggestions(systemBName)
-      return message.send(`I couldn't find coordinates for the '${systemBName}' system. Did you mean: ${systemSuggestions.join(', ')}`)
-    }
+    const errorMessages = this.checkSystemsExist([systemA, systemB])
+    if (errorMessages.length > 0) return message.send(errorMessages.join('\n'))
+
     const x = systemA.x - systemB.x
     const y = systemA.y - systemB.y
     const z = systemA.z - systemB.z
@@ -45,8 +40,8 @@ module.exports = class extends Command {
    * @param {string} system - The name of the system
    */
   async getEDSMCoords (system) {
-    system = system.replace('+', '%2B').replace(' ', '+')
-    const url = `https://www.edsm.net/api-v1/system?sysname=${system}&coords=1`
+    const systemURL = system.replace('+', '%2B').replace(' ', '+')
+    const url = `https://www.edsm.net/api-v1/system?sysname=${systemURL}&coords=1`
     const response = await fetch(url)
       .then((response) => {
         if (response.status === 200) {
@@ -56,11 +51,12 @@ module.exports = class extends Command {
         }
       })
 
-    if (Array.isArray(response)) return null
-    if (!response) return null
+    if (Array.isArray(response)) return { name: system, exist: false }
+    if (!response) return { name: system, exist: false }
 
     return { // Made it return this way to match the object properties of getting coords through SQL. That way the run code doesn't change
       name: response.name,
+      exist: true,
       x: response.coords.x,
       y: response.coords.y,
       z: response.coords.z
@@ -68,7 +64,12 @@ module.exports = class extends Command {
   }
 
   async getCoords (system) {
-    return this.jegin.get('system', 'name', system)
+    const coordinates = await this.jegin.get('system', 'name', system)
+    if (!coordinates) {
+      return { name: system, exist: false }
+    }
+    coordinates.exist = true
+    return coordinates
   }
 
   async constructSystemNameArray () {
@@ -76,8 +77,22 @@ module.exports = class extends Command {
     return systemObjects.map(system => system.name)
   }
 
-  async makeSystemNameSuggestions (systemName) {
-    const suggestions = await this.fuzzySet.get(systemName, null, 0.7)
-    return suggestions.map(system => `\`${system[1]}\``)
+  makeSystemNameSuggestions (systemName) {
+    const suggestions = this.fuzzySet.get(systemName, [], 0.7)
+    return suggestions.map(system => `\`${system[1]}\``) || []
+  }
+
+  checkSystemsExist (systems) {
+    const errorArray = []
+    systems.forEach(system => {
+      let msg = ''
+      if (!system.exist) {
+        const systemSuggestions = this.makeSystemNameSuggestions(system.name)
+        msg += `I couldn't find the coordinates for \`${system.name}\` system.`
+        msg += (systemSuggestions.length > 0) ? ` Did you mean: ${systemSuggestions.join(', ')}` : ''
+        errorArray.push(msg)
+      }
+    })
+    return errorArray
   }
 }
