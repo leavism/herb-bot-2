@@ -1,6 +1,7 @@
 /* eslint-disable no-throw-literal */
 const { Command } = require('klasa')
 const fetch = require('node-fetch')
+const FuzzySet = require('fuzzyset.js')
 
 module.exports = class extends Command {
   constructor (...args) {
@@ -17,14 +18,20 @@ module.exports = class extends Command {
 
   async init () {
     this.jegin = this.client.providers.get('jegin')
+    this.fuzzySet = FuzzySet(await this.constructSystemNameArray())
   }
 
   async run (message, [systemAName, systemBName]) {
     const systemA = await this.getCoords(systemAName) || await this.getEDSMCoords(systemAName)
     const systemB = await this.getCoords(systemBName) || await this.getEDSMCoords(systemBName)
-    if (!systemA) return message.send(`I couldn't find coordinates for the '${systemAName}' system.`)
-    if (!systemB) return message.send(`I couldn't find coordinates for the '${systemBName}' system.`)
-
+    if (!systemA) {
+      const systemSuggestions = await this.makeSystemNameSuggestions(systemBName)
+      return message.send(`I couldn't find coordinates for the '${systemBName}' system. Did you mean: ${systemSuggestions.join(', ')}`)
+    }
+    if (!systemB) {
+      const systemSuggestions = await this.makeSystemNameSuggestions(systemBName)
+      return message.send(`I couldn't find coordinates for the '${systemBName}' system. Did you mean: ${systemSuggestions.join(', ')}`)
+    }
     const x = systemA.x - systemB.x
     const y = systemA.y - systemB.y
     const z = systemA.z - systemB.z
@@ -62,5 +69,15 @@ module.exports = class extends Command {
 
   async getCoords (system) {
     return this.jegin.get('system', 'name', system)
+  }
+
+  async constructSystemNameArray () {
+    const systemObjects = await this.jegin.runAll('SELECT name FROM jegin.system')
+    return systemObjects.map(system => system.name)
+  }
+
+  async makeSystemNameSuggestions (systemName) {
+    const suggestions = await this.fuzzySet.get(systemName, null, 0.7)
+    return suggestions.map(system => `\`${system[1]}\``)
   }
 }
