@@ -22,8 +22,9 @@ module.exports = class extends Command {
   }
 
   async run (message, [systemAName, systemBName]) {
-    const systemA = await this.getCoords(systemAName) || await this.getEDSMCoords(systemAName)
-    const systemB = await this.getCoords(systemBName) || await this.getEDSMCoords(systemBName)
+    const systemA = await this.getCoords(systemAName)
+    const systemB = await this.getCoords(systemBName)
+
     const errorMessages = this.checkSystemsExist([systemA, systemB])
     if (errorMessages.length > 0) return message.send(errorMessages.join('\n'))
 
@@ -66,7 +67,7 @@ module.exports = class extends Command {
   async getCoords (system) {
     const coordinates = await this.jegin.get('system', 'name', system)
     if (!coordinates) {
-      return { name: system, exist: false }
+      return this.getEDSMCoords(system)
     }
     coordinates.exist = true
     return coordinates
